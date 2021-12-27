@@ -1,0 +1,130 @@
+@media(max-width: 575px){
+    .btn span{
+        display: none;
+    }
+    html{
+        font-size: 12px;
+    }
+}
+
+
+.navbarTextColor{
+    color: #28a745;
+}
+
+.navbarTextColor:hover{
+    color: green;
+}
+.nav-pills{
+    border-left:1px solid #333;
+    border-right:1px solid #333;
+}
+.nav-link{
+    color: white;
+}
+.nav-pills .nav-link:hover{
+    color: #198754;
+}
+.nav-item{
+    border-left:1px solid #333;
+    border-right:1px solid #333;
+}
+
+.marginTop{
+    margin-top: 10px;
+}
+body{
+    background-color: #222;
+    color: white;
+    margin-bottom: 20px;
+}
+.btn{
+    white-space: nowrap;
+}
+.btn-outline-success:hover{
+    background-color: transparent;
+    color: #28a745;
+}
+
+.Search-form{
+    background-color:#212529;
+    border: none;
+    color: white;
+    width: auto;
+}
+.Search-form:focus{
+    background-color: #212529;
+    color: white;
+    box-shadow: none;
+}
+
+.tweet-container{
+    max-width: 800px;
+    width: 80%;
+    border-radius: 30px;
+    margin-top: 20px;
+    padding: 25px;
+}
+
+.tweet-text{
+    word-break: break-all;
+}
+
+.font-bold{
+    font-size: 2.2rem;
+}
+
+
+.profile-container{
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-bottom: 20px;
+    margin-top: 7px;
+}
+
+.del_confirm{
+    margin-left: auto;
+    padding: .15rem .15rem;
+    height: 30px;
+}
+.modal-content{
+   background-color: #000b00;
+}
+#like{
+    background: transparent;
+    border: none;
+}
+#like:focus{
+    outline: none;
+}
+.like-after{
+    color: red ;
+}
+.like-before{
+    color: white;
+}
+.like-before:hover{
+    color: red;
+}
+p.count{
+    margin-bottom: 0;
+}
+.search-tweet{
+    width: auto;
+}
+
+.comment a{
+    color: white;
+    text-decoration: none;
+}
+.comment a:hover{
+    color: gray;
+}
+.stars{
+    font-size: 1.33333em;
+    color: gray;
+}
+.stars-yellow{
+    font-size: 1.33333em;
+    color: yellow;
+}

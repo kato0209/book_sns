@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="{% static 'userPage.css' %}" rel="stylesheet"> 
+<link href="{% static 'up_button.css' %}" rel="stylesheet"> 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% endblock head %}
+{% block title %}
+マイページ
+{% endblock title %}
+
+
+{% block content %}
+<div class="container mt-5">
+  <!-- ユーザープロフィール -->
+  <div class="font-bold profile-container d-flex align-items-center">
+      <img src="{{ tweetUser.ProfileImage.url }}" class="user-icon me-3">{{tweetUser.username}}
+      {% if user == tweetUser %}
+      <a href="{% url 'profile_edit' user.id %}" class="btn btn-success logout-button ms-auto" role="button" aria-pressed="true">プロフィールを変更</a>
+      {% else %}
+      <form action="{% url 'follow' %}" method="POST" class="ms-auto">{% csrf_token %}
+        {% if followed %}
+            <button id="follow" name="{{tweetUser.id}}" class="btn btn-light clear-decoration">フォロー解除</button>
+        {% else %}
+            <button id="follow" name="{{tweetUser.id}}" class="btn btn-success clear-decoration">フォロー</button>      
+        {% endif %}
+      </form>
+      {% endif %}
+  </div>
+  <!--------------------->
+
+  <!-- 投稿の一覧 -->
+{% for tweet in object_list reversed %}
+  <div class="tweet-container container border border-secondary">
+      <p class="font-bold d-flex">
+      <img src="{{ tweet.user.ProfileImage.url }}" class="user-icon me-3">
+      {{ tweet.user.username }} 
+      {% if user == tweetUser %}
+      <button type="button" class="btn btn-danger del_confirm" data-bs-toggle="modal" data-bs-target="#DeleteModal"  data-deleteurl="{% url 'TweetDelete' tweet.id %}">削除</button>
+      {% endif %}
+      </p>
+      <p class="tweet-text">{{ tweet.content | linebreaksbr }}</p>
+      {% if tweet.snsImage %}
+      <p><img src="{{ tweet.snsImage.url }}" width="70%" style="border-radius: 5%;" class="bg-light"></p>
+      {% endif %}
+    <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
+      {% if tweet.id in liked_list %}
+          <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="fas fa-lg fa-heart like-after"></i></button>
+      {% else %}
+          <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="far fa-lg fa-heart like-before"></i></button>      
+      {% endif %}
+          <p name="{{tweet.id}}-count" class="count"> {{ tweet.like_set.count }} </p>
+    </form>
+  </div>
+{% endfor %}
+  <button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
+</div>
+
+<!-- DeleteModal -->
+<div class="modal fade" id="DeleteModal" tabindex="-1" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="DeleteModalLabel">確認</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        本当に削除してよろしいですか?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+        <a href="#" class="btn btn-danger" id="del_url">OK</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block footer %}
+<script src="{% static 'up_button.js' %}"></script>
+<script src="{% static 'tweet_del.js' %}"></script>
+
+<script type="text/javascript">
+//いいね機能のajax処理
+$(document).ready(function(event){
+  $(document).on('click', '#like', function(event){
+    event.preventDefault();
+      $.ajax({
+          type: 'POST',
+          url: "{% url 'like' %}",
+          data: {
+              'id': $(this).attr('name'),
+              'like-type':$(this).data('like-type'),
+              'csrfmiddlewaretoken': '{{ csrf_token }}'},
+          dataType: 'json'
+      })
+      .done(function(response){
+          selector = document.getElementsByName(response.id);
+                  if(response.liked){
+                      $(selector).html("<i class='fas fa-lg fa-heart like-after'></i>");
+                  }
+                  else {
+                      $(selector).html("<i class='far fa-lg fa-heart like-before'></i>");
+                  }
+                  selector2 = document.getElementsByName(response.id + "-count");
+                  $(selector2).text(response.count);
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+          console.log("ajax通信に失敗しました");
+          console.log("jqXHR          : " + jqXHR.status); 
+          console.log("textStatus     : " + textStatus);    
+          console.log("errorThrown    : " + errorThrown.message); 
+          console.log("URL            : " + url);
+  });
+           
+  });
+});
+
+
+//フォロー機能のajax処理
+$(document).ready(function(event){
+  $(document).on('click', '#follow', function(event){
+    event.preventDefault();
+      $.ajax({
+          type: 'POST',
+          url: "{% url 'follow' %}",
+          data: {
+              'user_id': $(this).attr('name'),
+              'csrfmiddlewaretoken': '{{ csrf_token }}'},
+          dataType: 'json'
+      })
+      .done(function(response){
+          selector = document.getElementsByName(response.user_id);
+                  if(response.followed){
+                      $(selector).removeClass("btn-success");
+                      $(selector).addClass("btn-light");
+                      $(selector).text("フォロー解除")
+                  }
+                  else {
+                      $(selector).removeClass("btn-light");
+                      $(selector).addClass("btn-success");
+                      $(selector).text("フォロー")
+                  }
+                  $(this).blur();
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+          console.log("ajax通信に失敗しました");
+          console.log("jqXHR          : " + jqXHR.status); 
+          console.log("textStatus     : " + textStatus);    
+          console.log("errorThrown    : " + errorThrown.message); 
+          console.log("URL            : " + url);
+  });
+           
+  });
+});
+</script>
+{% endblock footer%}

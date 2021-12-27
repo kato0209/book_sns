@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="{% static 'home.css' %}" rel="stylesheet"> 
+<link href="{% static 'up_button.css' %}" rel="stylesheet"> 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% endblock head %}
+{% block title %}
+ホーム
+{% endblock title %}
+
+{% block header %}
+<!-- navbar(検索フォーム付き) -->
+<nav class="navbar bg-dark sticky-top mb-3">
+  <div class="container-fluid">
+    <a class="navbar-brand navbarTextColor"><i class="far fa-smile-beam smileIcon"></i>SNS_App</a>
+
+    <ul class="nav nav-pills">
+      <li class="nav-item"><a href="{% url 'home' %}" class="nav-link">ホーム</a></li>
+      <li class="nav-item"><a href="" class="nav-link">チャット</a></li>
+      <li class="nav-item"><a href="{% url 'userPage' user.id%}" class="nav-link">マイページ</a></li>
+    </ul>
+
+    <form method="GET" class="d-flex" action="{% url 'search_user' %}">
+      <input class="form-control" type="text" placeholder="ユーザーを検索" aria-label="Search" name="keyword_user">
+      <button class="btn btn-success" type="submit"><i class="fas fa-search"></i><span>検索</span></button>
+    </form>
+  </div>
+</nav>
+{% endblock header %}
+
+{% block content %}
+<!-- ログアウト、検索バー、tweetボタンなど -->
+<div class="mx-3 mb-4">
+    <form method="GET" class="d-flex">
+      <a href="{% url 'logout' %}" class="btn btn-success" role="button" aria-pressed="true">ログアウト</a>
+        <input type="text" class="form-control Search-form ms-auto" placeholder="tweetを検索" name="keyword">
+        <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i><span>検索</span></button>
+    </form>
+</div>
+
+  <div class="font-bold profile-container d-flex flex-wrap align-items-center">
+    <a href="{% url 'userPage' user.id %}" class="me-3" role="button" aria-pressed="true">
+      <img src="{{ user.ProfileImage.url }}" class="user-icon" >
+    </a>
+    {{user.username}}
+    <a href="{% url 'tweet' %}" class="btn btn-success ms-3" role="button" aria-pressed="true">tweetする</a>
+  </div>
+<!------------------------------------->
+
+<!-- 投稿の一覧 -->
+{% for tweet in tweetmodel_list reversed %}
+<div class="tweet-container container border border-secondary">
+    
+    <p class="font-bold d-flex">
+      <a href="{% url 'userPage' tweet.user.id %}" class="me-3" role="button" aria-pressed="true">
+      <img src="{{ tweet.user.ProfileImage.url }}" class="user-icon">
+     </a>
+      {{ tweet.user.username }} 
+      {% if user == tweet.user %}
+      <button type="button" class="btn btn-danger del_confirm" data-bs-toggle="modal" data-bs-target="#DeleteModal"  data-deleteurl="{% url 'TweetDelete' tweet.id %}">削除</button>
+      {% endif %}
+    </p>
+   <p class="tweet-text">{{ tweet.content | linebreaksbr }}</p>
+    {% if tweet.snsImage %}
+    <p><img src="{{ tweet.snsImage.url }}" width="70%" style="border-radius: 5%;" class="bg-light"></p>
+    {% endif %}
+
+  <div class="d-flex"> 
+    <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
+      {% if tweet.id in liked_list %}
+          <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="fas fa-lg fa-heart like-after"></i></button>
+      {% else %}
+          <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="far fa-lg fa-heart like-before"></i></button>      
+      {% endif %}
+      <p name="{{tweet.id}}-count" class="count"> {{ tweet.like_set.count }} </p>
+    </form>
+
+    <div class="rating ms-auto">
+      <span class="stars" id="star-1" name="{{tweet.rating}}">★</span>
+      <span class="stars" id="star-2" name="{{tweet.rating}}">★</span>
+      <span class="stars" id="star-3" name="{{tweet.rating}}">★</span>
+      <span class="stars" id="star-4" name="{{tweet.rating}}">★</span>
+      <span class="stars" id="star-5" name="{{tweet.rating}}">★</span>
+    </div>
+  </div>
+  <hr>
+   <div class="comment">
+    <a href="{% url 'CreateComment' tweet.id %}" class="me-3" role="button" aria-pressed="true">
+     コメント>
+    </a>
+   </div>
+</div>
+{% endfor %}
+<!------------------------------>
+
+<button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
+
+<!-- DeleteModal -->
+<div class="modal fade" id="DeleteModal" tabindex="-1" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="DeleteModalLabel">確認</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        本当に削除してよろしいですか?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+        <a href="#" class="btn btn-danger" id="del_url">OK</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block footer %}
+<script src="{% static 'home.js' %}"></script>
+<script src="{% static 'up_button.js' %}"></script>
+<script src="{% static 'tweet_del.js' %}"></script>
+
+<!--いいね機能のAjax処理-->
+<script type="text/javascript">
+$(document).ready(function(event){
+  $(document).on('click', '#like', function(event){
+    event.preventDefault();
+      $.ajax({
+          type: 'POST',
+          url: "{% url 'like' %}",
+          data: {
+              'id': $(this).attr('name'),
+              'like-type':$(this).data('like-type'),
+              'csrfmiddlewaretoken': '{{ csrf_token }}'},
+          dataType: 'json'
+      })
+      .done(function(response){
+          selector = document.getElementsByName(response.id);
+                  if(response.liked){
+                      $(selector).html("<i class='fas fa-lg fa-heart like-after'></i>");
+                  }
+                  else {
+                      $(selector).html("<i class='far fa-lg fa-heart like-before'></i>");
+                  }
+                  selector2 = document.getElementsByName(response.id + "-count");
+                  $(selector2).text(response.count);
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+          console.log("ajax通信に失敗しました");
+          console.log("jqXHR          : " + jqXHR.status); 
+          console.log("textStatus     : " + textStatus);    
+          console.log("errorThrown    : " + errorThrown.message); 
+          console.log("URL            : " + url);
+  });
+           
+  });
+});
+</script>
+{% endblock footer%}

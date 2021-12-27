@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+<link href="{% static 'login.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+
+{% endblock head %}
+{% block title %}
+ログインページ
+{% endblock title %}
+
+{% block header %}
+{% endblock header %}
+
+{% block content %}
+  
+<div class="container text-center">
+  <p class="errortext">{{error}}</p>
+ <main class="form-signin">
+    <i class="fas fa-sign-in-alt loginIcon">SNS_App</i>
+    <form method="POST">{% csrf_token %}
+      <h1 class="h3 mb-3 fw-normal">Please login</h1>
+      <input type="email" class="form-control" name="email" placeholder="メールアドレス" required autofocus>
+      <input type="password"  class="form-control" name="password" placeholder="パスワード" required>
+      <button class="w-100 btn btn-lg btn-success" type="submit">Login</button>
+    </form>
+ </main>
+   <p style="color: white;">アカウントをお持ちでない方はこちら→<a href="{% url 'signup' %}">アカウントを作成</a></p>
+</div>
+{% endblock content %}

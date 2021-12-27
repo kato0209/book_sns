@@ -1,0 +1,93 @@
+@media(max-width:575px){
+  html{
+    font-size: 10px;
+  }
+}
+
+body {
+  background-color:#222;
+  color: white;
+}
+
+.form-tweet {
+  width: 100%;
+  max-width: 800px;
+  padding: 15px;
+  margin: auto;
+  border-radius: 30px;
+  box-sizing: border-box;
+}
+
+.form-tweet .form-control {
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #222;
+  border: none;
+  color: white;
+}
+
+.form-tweet input[type="email"] {
+  margin-bottom: -1px;
+}
+.form-tweet input[type="password"] {
+  margin-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.tweetpage-title{
+    color: #28a745;
+    margin-bottom: 20px;
+    font-size:3em;
+}
+textarea{
+    resize: vertical;
+    max-height: 500px;
+    height:38px;
+}
+.form-control:focus{
+    box-shadow: none !important;
+    outline: none;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: white !important;
+}
+.form-select{
+  width: 35%;
+}
+.form-select:focus{
+  box-shadow: none !important;
+  outline: none;
+}
+
+#id_snsImage{
+  display: none;
+}
+.hooter-container{
+    text-align: left;
+}
+.image-label{
+  background-color: #198754;
+  cursor: pointer;
+  padding: 10px 40px;
+  border-radius: 20px;
+}
+.btn-success{
+  border-radius: 20px;
+  margin-left: auto;
+}
+#file-preview{
+  border-radius: 20px;
+  width: 70%;
+  height: 50%;
+}
+#id_category{
+  margin-right: 10px;
+}
+

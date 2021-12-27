@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="{% static 'search_user.css' %}" rel="stylesheet"> 
+<link href="{% static 'up_button.css' %}" rel="stylesheet"> 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% endblock head %}
+
+{% block title %}
+ユーザー検索ページ
+{% endblock title %}
+
+{% block content %}
+  
+<main class="form-search-user">
+  <!-- 検索フォーム -->
+  <div class="container">
+    <form method="GET" class="d-flex">
+          <input type="text" class="form-control Search-form" placeholder="ユーザーを検索" name="keyword_user">
+          <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i><span>検索</span></button>
+    </form>
+  </div>
+  <!------------->
+
+<!-- ユーザー一覧 -->
+{% for searched_user in user_list%}
+  <div class="user-container container border border-secondary">
+    <div class="font-bold d-flex flex-wrap">
+      <a href="{% url 'userPage' searched_user.id %}" class="me-3" role="button" aria-pressed="true">
+        <img src="{{ searched_user.ProfileImage.url }}" class="user-icon">
+      </a>
+      {{ searched_user.username }} 
+      {% if searched_user != user %}
+      <form action="{% url 'follow' %}" method="POST" class="ms-auto">{% csrf_token %}
+          {% if searched_user.id in followed_list %}
+              <button id="follow" name="{{searched_user.id}}" class="btn btn-light clear-decoration">フォロー解除</button>
+          {% else %}
+              <button id="follow" name="{{searched_user.id}}" class="btn btn-success clear-decoration">フォロー</button>      
+          {% endif %}
+      </form>
+      {% endif %}
+    </div>
+  </div>
+{% endfor %}
+<!---------------->
+
+  <button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
+</main>
+{% endblock content %}
+
+{% block footer %}
+<script src="{% static 'up_button.js' %}"></script>
+
+<!-- フォロー機能のajax処理 -->
+<script type="text/javascript">
+$(document).ready(function(event){
+  $(document).on('click', '#follow', function(event){
+    event.preventDefault();
+      $.ajax({
+          type: 'POST',
+          url: "{% url 'follow' %}",
+          data: {
+              'user_id': $(this).attr('name'),
+              'csrfmiddlewaretoken': '{{ csrf_token }}'},
+          dataType: 'json'
+      })
+      .done(function(response){
+          selector = document.getElementsByName(response.user_id);
+                  if(response.followed){
+                      $(selector).removeClass("btn-success");
+                      $(selector).addClass("btn-light");
+                      $(selector).text("フォロー解除")
+                  }
+                  else {
+                      $(selector).removeClass("btn-light");
+                      $(selector).addClass("btn-success");
+                      $(selector).text("フォロー")
+                  }
+                  $(this).blur();
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+          console.log("ajax通信に失敗しました");
+          console.log("jqXHR          : " + jqXHR.status); 
+          console.log("textStatus     : " + textStatus);    
+          console.log("errorThrown    : " + errorThrown.message); 
+          console.log("URL            : " + url);
+  });
+           
+  });
+});
+</script>
+{% endblock footer%}
