@@ -15,7 +15,7 @@ urlpatterns = [
     path('userPage/<int:pk>',userPageView.as_view(), name='userPage'),
     path('follow/',FollowFunc, name='follow'),
     path('CreateComment/<int:tweet_pk>',CreateComment.as_view(), name='CreateComment'),
-    path('Chat/', Chat.as_view(), name='chat'),
-    path('chat/<str:room_name>', chat, name='chat_room'),
-    path('room/', room, name='room'),
+    path('Chat/<int:user_id>', Chat.as_view(), name='Chat'),
+    path('chat_room/<uuid:room_id>/<int:user_id>', chat_room, name='chat_room'),
+    path('room/<int:pk>', room, name='room'),
 ]

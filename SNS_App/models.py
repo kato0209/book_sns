@@ -95,15 +95,22 @@ class Connection(models.Model):
 
 class Room(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    name = models.CharField(max_length=50)
     created_at = models.DateTimeField(default=timezone.now)
-    user1 = models.ForeignKey(CustomUser, related_name='user1', on_delete=models.CASCADE,null=True)
-    user2 = models.ForeignKey(CustomUser, related_name='user2', on_delete=models.CASCADE,null=True)#################
+    room_member = models.ManyToManyField(
+        'CustomUser',
+        through='Entries',
+        )
+
+class Entries(models.Model):
+    room = models.ForeignKey('Room', on_delete=models.CASCADE)
+    user = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    joined_at=models.DateTimeField(default=timezone.now)
 
 class Message(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    room = models.ForeignKey(Room,blank=True,null=True,related_name='room_meesages',on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
+    user=models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True)
+    room = models.ForeignKey(Room,blank=True,null=True,on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
+    
 

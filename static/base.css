@@ -1,3 +1,16 @@
+@media(max-width: 1000px){
+    html{
+        font-size: 12px !important;
+    }
+  }
+@media(max-width: 575px){
+  html{
+      font-size: 10px !important;
+  }
+}
+nav{
+    width: 100%;
+}
 .navbarTextColor{
     color: #28a745;
 }
@@ -24,7 +37,9 @@ body{
     color: white;
     margin-bottom: 20px;
 }
-
+footer{
+    width: 100%;
+}
 
 @media(max-width:575px){
     .user-icon{
