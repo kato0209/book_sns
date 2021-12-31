@@ -18,8 +18,8 @@
 
     <ul class="nav nav-pills">
       <li class="nav-item"><a href="{% url 'home' %}" class="nav-link">ホーム</a></li>
-      <li class="nav-item"><a href="" class="nav-link">チャット</a></li>
-      <li class="nav-item"><a href="{% url 'userPage' user.id%}" class="nav-link">マイページ</a></li>
+      <li class="nav-item"><a href="{% url 'Chat' user.id %}" class="nav-link">チャット</a></li>
+      <li class="nav-item"><a href="{% url 'userPage' user.id %}" class="nav-link">マイページ</a></li>
     </ul>
 
     <form method="GET" class="d-flex" action="{% url 'search_user' %}">
@@ -56,7 +56,7 @@
     <p class="font-bold d-flex">
       <a href="{% url 'userPage' tweet.user.id %}" class="me-3" role="button" aria-pressed="true">
       <img src="{{ tweet.user.ProfileImage.url }}" class="user-icon">
-     </a>
+      </a>
       {{ tweet.user.username }} 
       {% if user == tweet.user %}
       <button type="button" class="btn btn-danger del_confirm" data-bs-toggle="modal" data-bs-target="#DeleteModal"  data-deleteurl="{% url 'TweetDelete' tweet.id %}">削除</button>

@@ -19,13 +19,18 @@
       {% if user == tweetUser %}
       <a href="{% url 'profile_edit' user.id %}" class="btn btn-success logout-button ms-auto" role="button" aria-pressed="true">プロフィールを変更</a>
       {% else %}
-      <form action="{% url 'follow' %}" method="POST" class="ms-auto">{% csrf_token %}
+      <div class="ms-auto d-flex">
+        <a href="{% url 'room' tweetUser.id %}" class="MessageButton me-3" role="button" aria-pressed="true">
+          <i class="far fa-envelope"></i>
+        </a>
+      <form action="{% url 'follow' %}" method="POST">{% csrf_token %}
         {% if followed %}
             <button id="follow" name="{{tweetUser.id}}" class="btn btn-light clear-decoration">フォロー解除</button>
         {% else %}
             <button id="follow" name="{{tweetUser.id}}" class="btn btn-success clear-decoration">フォロー</button>      
         {% endif %}
       </form>
+      </div>
       {% endif %}
   </div>
   <!--------------------->

@@ -7,15 +7,7 @@
   }
 }
 
-html,
-
-body {
-  background-color:#222;
-  color: white;
-}
-
 .form-search-user {
-  
   padding: 15px;
   margin: auto;
   border-radius: 30px;

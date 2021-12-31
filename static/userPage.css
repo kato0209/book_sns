@@ -68,3 +68,13 @@ p.count{
     border: none ;
     box-shadow: none;
 }
+.fa-envelope{
+    color: white;
+    border:3px solid ;
+    border-radius: 100%;
+    padding: 5px;
+    font-size: 1.5rem;
+}
+.fa-envelope:hover{
+    background-color: #5c5c5c;
+}

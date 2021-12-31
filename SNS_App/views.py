@@ -257,21 +257,55 @@ class Chat(LoginRequiredMixin,generic.ListView):
     context_object_name = 'room_list'
 
     def get_queryset(self,**kwargs):
-        queryset = super().get_queryset(**kwargs).order_by('-created_at')[:5]
+        queryset = super().get_queryset(**kwargs).order_by('-created_at')
         return queryset
 
-def chat(request, room_name):
-    messages = Message.objects.filter(room__name=room_name).order_by('-created_at')[:50]
-    room = Room.objects.filter(name=room_name)[0]
+    def get_context_data(self,**kwargs):
+        context = super().get_context_data(**kwargs)
+        partner_list=[]
+        message_list=[]
+        room_list=[]
+        partner_dict={}
+        user=CustomUser.objects.get(id=self.kwargs['user_id'])
+        entries=Entries.objects.filter(user=user).order_by('-joined_at')
+        for entry in entries:
+            room_list.append(entry.room)
+
+        for room in room_list:
+            partner=room.room_member.all().exclude(id=user.id)[0]
+            message=room.message_set.order_by('-created_at')[0]
+            partner_list.append(partner)
+            message_list.append(message)
+        
+        partner_dict=dict(zip(partner_list,message_list))
+        context['room_list']=room_list
+        context['partner_dict']=partner_dict
+        return context
+
+
+def chat_room(request, room_id,user_id):
+    room = Room.objects.get(id=room_id)
+    Partner=CustomUser.objects.get(pk=user_id)
+    messages = Message.objects.filter(room=room).order_by('created_at')
     template = loader.get_template('chat_room.html')
     context = {
-        'messages': messages,
-        'room': room
+        'messages':messages,
+        'room': room,
+        'Partner':Partner
     }
     return HttpResponse(template.render(context, request))
 
-def room(request):
-    name = request.POST.get("room_name")
-    room = Room.objects.create(name=name)
-    return HttpResponseRedirect(reverse('chat_room', args=[name]))
+def room(request,pk):
+    User1=request.user
+    User2=CustomUser.objects.get(pk=pk)
+    member_list=[User1,User2]
+    roomQuery=Room.objects.filter(room_member=User1).filter(room_member=User2)
+    if not roomQuery.exists():
+        room = Room.objects.create()
+        room.room_member.add(User1)
+        room.room_member.add(User2)
+    else:
+        room=roomQuery[0]
+
+    return HttpResponseRedirect(reverse('chat_room', args=[room.id,User2.id]))
 

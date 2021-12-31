@@ -33,8 +33,6 @@ main{
 textarea{
     resize: vertical;
     max-height: 500px;
-    height:30px;
-    line-height: 20px;
     border: none !important;
 }
 .form-control {
@@ -94,4 +92,8 @@ p.count{
 footer{
     background-color: #222;
     border-top: 1px #333333 solid;
+}
+#submit-button{
+    max-height: 38px;
+    margin-top: auto;
 }

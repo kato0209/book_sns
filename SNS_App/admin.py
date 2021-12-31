@@ -18,11 +18,18 @@ class CustomUserAdmin(UserAdmin):
             ('profile-image', {'fields': ('ProfileImage',)}),
     )
 
+class MemberInlineAdmin(admin.TabularInline):
+    model = Room.room_member.through
+
+class RoomAdmin(admin.ModelAdmin):
+    inlines = (MemberInlineAdmin,)
+
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(TweetModel)
 admin.site.register(Like)
 admin.site.register(Connection)
 admin.site.register(Category)
 admin.site.register(Comment)
-admin.site.register(Room)
+admin.site.register(Room,RoomAdmin)
 admin.site.register(Message)
+admin.site.register(Entries)

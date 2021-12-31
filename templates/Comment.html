@@ -80,10 +80,10 @@
 <!-- 下部のbar -->
 <footer class="footer mt-auto py-3 fixed-bottom">
  <div class="container">
-    <form method="POST" enctype="multipart/form-data">{% csrf_token %}
+    <form method="POST" enctype="multipart/form-data" class="d-flex">{% csrf_token %}
       {{form.text}}
         <div class="d-flex">
-         <button class="btn btn-success ms-auto" type="submit">送信</button>
+         <button class="btn btn-success ms-auto" type="submit" id="submit-button">送信</button>
         </div>
     </form>
  </div>
