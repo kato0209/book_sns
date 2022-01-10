@@ -9,6 +9,15 @@ from django.urls import reverse_lazy,reverse
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse,HttpResponseRedirect, HttpResponse
 from django.template import loader
+import requests
+import json
+import os
+import environ
+from SNS_project import settings 
+from django.core.serializers.json import DjangoJSONEncoder
+
+env = environ.Env()
+env.read_env(os.path.join(settings.BASE_DIR,'.env'))
 
 class signupView(generic.CreateView):
     model=get_user_model()
@@ -44,6 +53,7 @@ class HomeView(LoginRequiredMixin,generic.ListView):
 
     def get_queryset(self,**kwargs):
         queryset = super().get_queryset(**kwargs)
+        queryset=queryset.exclude(user=self.request.user)
         keyword=self.request.GET.get('keyword')
         if keyword:
             queryset=queryset.filter(content__icontains=keyword)
@@ -62,17 +72,42 @@ class HomeView(LoginRequiredMixin,generic.ListView):
         context['liked_list']=liked_list
         return context
 
-class TweetView(LoginRequiredMixin,generic.CreateView):
-    template_name='tweet.html'
-    model=TweetModel
-    form_class=TweetCreationForm
-    success_url=reverse_lazy('home')
+################################
+def TweetCreate(request):
+    if request.method == "POST":
+        form=TweetCreationForm(request.POST,request.FILES)
+        if request.POST.get('Select'):
+            request.session['form-data']=request.POST
+            request.session['form-file']=request.FILES
+            return JsonResponse({})
+        elif form.is_valid():
+            tweet=form.save(commit=False)
+            tweet.user = request.user   
+            tweet.ISBNcode=request.session.get('ISBNcode')
+            tweet.save()
+            del request.session['form-data']
+            del request.session['form-file']
+            del request.session['Gametitle']
+            del request.session['ISBNcode']
+            return redirect('home')
+    elif request.method == "GET":
+        if 'Gametitle' in request.session:
+            form = TweetCreationForm(request.session.get('form-data'),request.session.get('form-file'))
+            GameTitle=request.session.get('Gametitle')
+            return render(request,'tweet.html',{'form':form,'Gametitle':GameTitle})
+        else:
+            form=TweetCreationForm()
+            return render(request,'tweet.html',{'form':form})
 
-    def form_valid(self, form):
-        tweet=form.save(commit=False)
-        tweet.user = self.request.user   
-        tweet.save()
-        return super().form_valid(form)
+
+def SelectItem(request,ISBNcode):
+    Item=get_api_data(params={'isbn':ISBNcode})
+    item=Item[0]['Item']
+    request.session['Gametitle']=item['title']
+    request.session['ISBNcode']=ISBNcode
+    return redirect('tweet')
+        
+####################################################
 
 @login_required
 def tweet_del(request, tweet_pk):
@@ -91,6 +126,7 @@ class profile_editView(LoginRequiredMixin,generic.UpdateView):
     form_class=CustomUserChangeForm
     template_name='profile_edit.html'
     success_url = reverse_lazy('home')
+
 
 class SearchUserView(LoginRequiredMixin,generic.ListView):
     model=CustomUser
@@ -295,6 +331,7 @@ def chat_room(request, room_id,user_id):
     }
     return HttpResponse(template.render(context, request))
 
+@login_required
 def room(request,pk):
     User1=request.user
     User2=CustomUser.objects.get(pk=pk)
@@ -309,3 +346,104 @@ def room(request,pk):
 
     return HttpResponseRedirect(reverse('chat_room', args=[room.id,User2.id]))
 
+
+#RakutenAPI
+SEARCH_URL='https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&applicationId='+env('APPLICATIONID')
+
+def get_api_data(params):
+        api=requests.get(SEARCH_URL,params=params).text
+        result=json.loads(api)
+        items=result['Items']
+        return items
+
+class SearchItem(LoginRequiredMixin,generic.View):
+    def get(self, request, *args, **kwargs):
+        From=self.kwargs['From']
+        form=RakutenSearchForm()
+        return render(request,'Item-search.html',{'form':form,'From':From})
+
+    def post(self, request, *args, **kwargs):
+        form=RakutenSearchForm(request.POST or None)
+        From=self.kwargs['From']
+        if form.is_valid():
+            keyword=form.cleaned_data['title']
+            booksGenreId=form.cleaned_data['category']
+            if booksGenreId and keyword:
+                params={
+                'title':keyword,
+                'booksGenreId':booksGenreId,
+                'outOfStockFlag':1,
+            }
+            elif keyword:
+                params={
+                'title':keyword,
+                'outOfStockFlag':1,
+            }
+            elif booksGenreId:
+                params={
+                'booksGenreId':booksGenreId,
+                'outOfStockFlag':1,
+            }
+            else:
+                params={
+                'outOfStockFlag':1,
+            }
+            items=get_api_data(params)
+            game_data=[]
+            for i in items:
+                item=i['Item']
+                title=item['title']
+                image=item['largeImageUrl']
+                author=item['author']
+                itemPrice=item['itemPrice']
+                ISBNcode=item['isbn']
+                query={
+                    'title':title,
+                    'image':image,
+                    'author':author,
+                    'itemPrice':itemPrice,
+                    'ISBNcode':ISBNcode,
+                }
+                game_data.append(query)
+            return render(request,'Itemlist.html',{
+                'game_data':game_data,
+                'keyword':keyword,
+                'form':form,
+                'booksGenreId':booksGenreId,
+                'From':From,
+            })
+        return render(request,'Item-search.html',{
+            'form':form,
+            'From':From,
+        })
+
+def SearchByCategory(request,From,booksGenreId):
+    form=RakutenSearchForm(initial={'category':booksGenreId})
+    params={
+        'booksGenreId':booksGenreId,
+        'outOfStockFlag':1,
+    }
+    items=get_api_data(params)
+    game_data=[]
+    for i in items:
+        item=i['Item']
+        title=item['title']
+        image=item['largeImageUrl']
+        author=item['author']
+        itemPrice=item['itemPrice']
+        ISBNcode=item['isbn']
+        query={
+            'title':title,
+            'image':image,
+            'author':author,
+            'itemPrice':itemPrice,
+            'ISBNcode':ISBNcode,
+        }
+        game_data.append(query)
+
+    return render(request,'Itemlist.html',{
+                'game_data':game_data,
+                'form':form,
+                'booksGenreId':booksGenreId,
+                'From':From,
+            })

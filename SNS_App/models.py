@@ -60,21 +60,13 @@ class CustomUser(AbstractUser):
     class Meta(AbstractUser.Meta):
         swappable = 'AUTH_USER_MODEL'
 
-
-class Category(models.Model):
-    name=models.CharField(verbose_name='カテゴリ名',max_length=30)
-
-    def __str__(self):
-        return self.name
-
 class TweetModel(models.Model):
-    title=models.CharField(max_length=70)
-    content=models.TextField()
+    title=models.CharField(max_length=70,blank=True)
+    content=models.TextField(blank=True)
     user=models.ForeignKey(CustomUser,verbose_name='紐づくユーザー',on_delete=models.CASCADE,blank=True)
-    rating=models.IntegerField()
+    rating=models.IntegerField(blank=True)
     snsImage=models.ImageField(null=True,blank=True,upload_to='')
-    category=models.ForeignKey(Category,verbose_name='カテゴリ',on_delete=models.SET_NULL,null=True)
-
+    ISBNcode=models.CharField(max_length=30,blank=True)
 
     def __str__(self):
         return self.title[:10]

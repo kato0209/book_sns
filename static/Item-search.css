@@ -1,0 +1,29 @@
+.form-control {
+    background-color: #212529;
+    color: white;
+    border-color: gray;
+    border: none;
+  }
+
+.form-control:focus{
+    box-shadow: none !important;
+    outline: none;
+    background-color: #212529;
+    color:white;
+}
+input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focus{
+    -webkit-box-shadow: 0 0 0 1000px #212529 inset !important;
+    -webkit-text-fill-color: white;
+    transition:0s;
+}
+.list-group{
+    width: 80%;
+}
+.list-group-item a{
+    color: #212529;
+    text-decoration: none;
+    display: block;
+}
+.list-group-item:hover{
+    background-color: #F2F2F2;
+}

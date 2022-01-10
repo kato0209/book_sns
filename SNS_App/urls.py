@@ -6,7 +6,7 @@ urlpatterns = [
     path('login/',loginFunc,name='login'),
     path('logout/',logoutFunc,name='logout'),
     path('home/',HomeView.as_view(),name='home'),
-    path('tweet/',TweetView.as_view(),name='tweet'),
+    path('tweet/',TweetCreate,name='tweet'),
     path('TweetDelete/<int:tweet_pk>',tweet_del,name='TweetDelete'),
     path('CommentDelete/<int:comment_pk>',comment_del,name='CommentDelete'),
     path('profile_edit/<int:pk>',profile_editView.as_view(),name='profile_edit'),
@@ -18,4 +18,8 @@ urlpatterns = [
     path('Chat/<int:user_id>', Chat.as_view(), name='Chat'),
     path('chat_room/<uuid:room_id>/<int:user_id>', chat_room, name='chat_room'),
     path('room/<int:pk>', room, name='room'),
+    path('SearchItem/<str:From>',SearchItem.as_view(),name='SearchItem'),
+    path('SearchByCategory/<str:From>/<str:booksGenreId>',SearchByCategory,name='SearchByCategory'),
+    path('SelectItem/<str:ISBNcode>',SelectItem,name='SelectItem'),
+    #path('FormHold/',FormHold,name='FormHold'),
 ]

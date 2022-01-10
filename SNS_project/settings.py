@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'SNS_App.apps.SnsAppConfig',
     'sorl.thumbnail',
+    'widget_tweaks',
     'channels',
 ]
 

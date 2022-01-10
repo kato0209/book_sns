@@ -3,7 +3,7 @@
 
 {% block head %}
 <link href="{% static 'tweet.css' %}" rel="stylesheet"> 
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 {% endblock head %}
 
 {% block title %}
@@ -15,23 +15,20 @@
 <div class="container text-center mt-5 mb-3">
   <i class="far fa-grin-squint tweetpage-title">投稿しましょう!</i>
  <main class="form-tweet border border-secondary">
-   <form method="POST" enctype="multipart/form-data">{% csrf_token %}
+   <form method="POST" action="{% url 'tweet' %}" enctype="multipart/form-data" id="TweetForm">{% csrf_token %}
      <div class="d-flex ms-auto mb-3">
       <img src="{{ user.ProfileImage.url }}" width="50px" height="50px" style="border-radius: 100%;">
      </div>
-     <div class="mb-3">
-      {{ form.title }}
-     </div>
-     <div class="mb-3">
-      {{ form.content }}
-     </div>
-     <div class="mb-3 mt-3">
-      <img id="file-preview" class="bg-light">
-     </div>
-     <div class="d-flex mb-3">
-      {{ form.category }}
-      {{ form.rating }}
-     </div>  
+     {% if Gametitle %}
+     {{Gametitle}}
+     <a href="{% url 'SearchItem' 'Select' %}" class="btn btn-lg btn-success" role="button" id="select-button">本を選択する</a>
+     {% else %}
+     <a href="{% url 'SearchItem' 'Select' %}" class="btn btn-lg btn-success" role="button" id="select-button">本を選択する</a>
+     {% endif %}
+     <div class="mb-3">{{ form.title }}</div>
+     <div class="mb-3">{{ form.content }}</div>
+     <div class="mb-3 mt-3"><img id="file-preview" class="bg-light"></div>
+     <div class="d-flex mb-3">{{ form.rating }}</div>  
      <div class="hooter-container d-flex">
         <label for="id_snsImage" class="image-label">画像を選択{{ form.snsImage }}</label>
         <button class="btn btn-lg btn-success" type="submit">投稿</button>
@@ -43,4 +40,31 @@
 
 {% block footer %}
 <script src="{% static 'tweet.js' %}"></script>
+
+<script type="text/javascript">
+
+window.onload=function(){
+    var Imagefile=document.getElementById('id_snsImage').value;
+    var fileReader = new FileReader();
+    fileReader.onload = function() {
+        
+        var dataUri = this.result;
+  
+        var img = document.getElementById('file-preview');
+        img.src = dataUri;
+    }
+    fileReader.readAsDataURL(Imagefile)
+  }
+
+  $(document).ready(function(event){
+    $(document).on('click', '#select-button', function(event){
+      const xhr = new XMLHttpRequest();
+      xhr.open('post', "{% url 'tweet' %}");
+      var form=document.getElementById('TweetForm')
+      var formData=new FormData(form);
+      formData.append('Select',true);
+      xhr.send(formData);
+    });
+  });
+  </script>
 {% endblock footer%}
