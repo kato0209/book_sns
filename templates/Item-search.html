@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load widget_tweaks%}
+{% load static %}
+
+{% block head %}
+<link href="{% static 'Item-search.css' %}" rel="stylesheet"> 
+{% endblock head %}
+
+{% block content %}
+<div class="my-5">
+    <form method="post" action="{% url 'SearchItem' From %}" class="d-flex">{% csrf_token %}
+        <div class="align-items-center w-100">
+            {% render_field form.title class="form-control" placeholder="キーワードから探す"%}
+        </div>
+        <button class="btn btn-success" type="submit">検索</button>
+    </form>
+    <h4 class="list-title mt-5">ジャンルから探す</h4>
+    <ul class="list-group">
+        <li class="list-group-item"><a href="{% url 'SearchByCategory' From '001004001' %}">ミステリー・サスペンス</a></li>
+        <li class="list-group-item"><a href="{% url 'SearchByCategory' From '001004002' %}">SF・ホラー</a></li>
+        <li class="list-group-item"><a href="{% url 'SearchByCategory' From '001004003' %}">エッセイ</a></li>
+        <li class="list-group-item"><a href="{% url 'SearchByCategory' From '001004004' %}">ノンフィクション</a></li>
+        <li class="list-group-item"><a href="{% url 'SearchByCategory' From '001004008' %}">日本の小説</a></li>
+        <li class="list-group-item"><a href="{% url 'SearchByCategory' From '001004009' %}">外国の小説</a></li>
+        <li class="list-group-item"><a href="{% url 'SearchByCategory' From '001004016' %}">ロマンス</a></li>
+        <li class="list-group-item"><a href="{% url 'SearchByCategory' From '001017' %}">ライトノベル</a></li>
+      </ul>
+</div>
+{% endblock content %}

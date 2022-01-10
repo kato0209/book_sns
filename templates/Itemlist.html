@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load widget_tweaks%}
+{% load static %}
+
+{% block head %}
+<link href="{% static 'Itemlist.css' %}" rel="stylesheet"> 
+{% endblock head %}
+{% block content %}
+<div class="text-center my-5">
+    <form method="post" action="{% url 'SearchItem' From %}" class="d-flex">{% csrf_token %}
+        <div class="align-items-center w-100">
+            {% render_field form.title class="form-control" placeholder="キーワードから探す"%}
+        </div>
+        {{ form.category}}
+        <button class="btn btn-success" type="submit">検索</button>
+    </form>
+</div>
+<div class="container my-5">
+    <div class="mb-5 border-bottom">
+        {% if keyword %}
+        <h3>「{{ keyword }}」の検索結果</h3>
+        {% endif %}
+    </div>
+    <div class="gameList">
+        {% for game in game_data %}
+            <div class="gameTag">
+                    <img src="{{ game.image }}" alt="" class="game-img me-3">
+                    <div class="px-2 py-3">
+                        <h5><a href="" class="game-title">{{game.title}}</a></h5>
+                        <p class="blue">{{game.author}}</p>
+                        <h3 class="text-warning">{{game.itemPrice}}円<sub class="text-secondary">(税込み)</sub></h3>
+                    </div>
+                    {% if From == "Select" %}
+                     <div class="ms-auto"><a href="{% url 'SelectItem' game.ISBNcode %}" class="btn btn-success" role="button" aria-pressed="true">選択</a></div>
+                    {% endif %}
+            </div>
+        {% empty %}
+                <p>該当するものはありません</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}
+
