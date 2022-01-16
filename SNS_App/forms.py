@@ -40,13 +40,11 @@ class TweetCreationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TweetCreationForm, self).__init__(*args, **kwargs)
-        self.fields['title'].widget.attrs.update({'class' : 'form-control','placeholder':'タイトル','autofocus' : 'autofocus'})
-        self.fields['content'].widget.attrs.update({'class' : 'form-control','placeholder':'感想を書こう!'})
-        for field in self.fields:
-            self.fields[field].required= False
+        self.fields['content'].widget.attrs.update({'class' : 'form-control','placeholder':'感想を書こう!','autofocus' : 'autofocus'})
+
 
     Choice=(
-        (0,'評価'),(1,1),(2,2),(3,3),(4,4),(5,5),
+        (None,'評価'),(1,1),(2,2),(3,3),(4,4),(5,5),
     )
     rating=forms.ChoiceField(choices=Choice,required=True)
 

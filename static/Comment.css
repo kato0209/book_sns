@@ -97,3 +97,16 @@ footer{
     max-height: 38px;
     margin-top: auto;
 }
+.book-container{
+    width: 90%;
+    border-radius: 30px;
+    margin: 30px auto 20px auto;
+    padding: 25px;
+}
+.book-title{
+    text-decoration: none;
+}
+.book-img{
+    width: 90px;
+    height: auto;
+}
