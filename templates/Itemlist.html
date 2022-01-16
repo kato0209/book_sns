@@ -21,17 +21,19 @@
         <h3>「{{ keyword }}」の検索結果</h3>
         {% endif %}
     </div>
-    <div class="gameList">
-        {% for game in game_data %}
-            <div class="gameTag">
-                    <img src="{{ game.image }}" alt="" class="game-img me-3">
+    <div class="bookList">
+        {% for book in book_data %}
+            <div class="bookTag">
+                    <img src="{{ book.image }}" alt="" class="book-img me-3">
                     <div class="px-2 py-3">
-                        <h5><a href="" class="game-title">{{game.title}}</a></h5>
-                        <p class="blue">{{game.author}}</p>
-                        <h3 class="text-warning">{{game.itemPrice}}円<sub class="text-secondary">(税込み)</sub></h3>
+                        <h5><a href="{{ book.itemUrl }}" class="book-title">{{book.title}}</a></h5>
+                        <p class="text-primary">{{book.author}}</p>
+                        <h3 class="text-warning">{{book.itemPrice}}円<sub class="text-secondary">(税込み)</sub></h3>
                     </div>
                     {% if From == "Select" %}
-                     <div class="ms-auto"><a href="{% url 'SelectItem' game.ISBNcode %}" class="btn btn-success" role="button" aria-pressed="true">選択</a></div>
+                     <div class="ms-auto"><a href="{% url 'SelectedItem' book.ISBNcode %}" class="btn btn-success" role="button" aria-pressed="true">選択</a></div>
+                    {% elif From == "Search" %}
+                    <div class="ms-auto"><a href="{% url 'TweetOfItem' book.ISBNcode %}" class="btn btn-success" role="button" aria-pressed="true">みんなの投稿を見る</a></div>
                     {% endif %}
             </div>
         {% empty %}

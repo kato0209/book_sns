@@ -1,4 +1,3 @@
-//評価機能
 const STARS=document.getElementsByClassName('stars');
 for(const star of STARS){
     var rating=star.getAttribute('name')

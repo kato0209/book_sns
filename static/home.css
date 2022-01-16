@@ -73,7 +73,6 @@ input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focu
     margin-top: 20px;
     padding: 25px;
 }
-
 .tweet-text{
     word-break: break-all;
 }
@@ -135,4 +134,17 @@ p.count{
 .stars-yellow{
     font-size: 1.33333em;
     color: yellow;
+}
+.book-container{
+    width: 90%;
+    border-radius: 30px;
+    margin: 30px auto 20px auto;
+    padding: 25px;
+}
+.book-title{
+    text-decoration: none;
+}
+.book-img{
+    width: 90px;
+    height: auto;
 }

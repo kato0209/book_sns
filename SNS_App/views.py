@@ -14,7 +14,7 @@ import json
 import os
 import environ
 from SNS_project import settings 
-from django.core.serializers.json import DjangoJSONEncoder
+
 
 env = environ.Env()
 env.read_env(os.path.join(settings.BASE_DIR,'.env'))
@@ -68,46 +68,59 @@ class HomeView(LoginRequiredMixin,generic.ListView):
             liked = tweet.like_set.filter(user=self.request.user)
             if liked.exists():
                 liked_list.append(tweet.id)
-
+        
         context['liked_list']=liked_list
         return context
 
-################################
-def TweetCreate(request):
+
+@login_required
+def TweetCreate(request,ISBNcode):
     if request.method == "POST":
-        form=TweetCreationForm(request.POST,request.FILES)
-        if request.POST.get('Select'):
-            request.session['form-data']=request.POST
-            request.session['form-file']=request.FILES
-            return JsonResponse({})
-        elif form.is_valid():
+        form=TweetCreationForm(request.POST)
+        book=BookData.objects.get(ISBNcode=ISBNcode)
+        if form.is_valid():
             tweet=form.save(commit=False)
             tweet.user = request.user   
-            tweet.ISBNcode=request.session.get('ISBNcode')
+            tweet.book=book
             tweet.save()
-            del request.session['form-data']
-            del request.session['form-file']
-            del request.session['Gametitle']
-            del request.session['ISBNcode']
             return redirect('home')
-    elif request.method == "GET":
-        if 'Gametitle' in request.session:
-            form = TweetCreationForm(request.session.get('form-data'),request.session.get('form-file'))
-            GameTitle=request.session.get('Gametitle')
-            return render(request,'tweet.html',{'form':form,'Gametitle':GameTitle})
         else:
-            form=TweetCreationForm()
-            return render(request,'tweet.html',{'form':form})
+            title=request.session.get('title') 
+            title=book.title
+            return render(request,'tweet.html',{'form':form,'ISBNcode':ISBNcode,'title':title,'error':'投稿に失敗しました'})
+    else:
+        form=TweetCreationForm()
+        book=BookData.objects.get(ISBNcode=ISBNcode)
+        title=book.title
+        return render(request,'tweet.html',{'form':form,'ISBNcode':ISBNcode,'title':title})
 
+@login_required
+def SelectItem(request):
+    return render(request,'book_select.html')
 
-def SelectItem(request,ISBNcode):
+@login_required
+def SelectedItem(request,ISBNcode):
     Item=get_api_data(params={'isbn':ISBNcode})
     item=Item[0]['Item']
-    request.session['Gametitle']=item['title']
-    request.session['ISBNcode']=ISBNcode
-    return redirect('tweet')
+    book=BookData.objects.filter(ISBNcode=ISBNcode)
+    if book.exists():
+        book=book[0]
+        book.title=item['title']
+        book.author=item['author']
+        book.itemPrice=item['itemPrice']
+        book.itemUrl=item['itemUrl']
+        book.ImageUrl=item['largeImageUrl']
+    else:
+        book.create(
+            ISBNcode=ISBNcode,
+            title=item['title'],
+            author=item['author'],
+            itemPrice=item['itemPrice'],
+            itemUrl=item['itemUrl'],
+            imageUrl=item['largeImageUrl']
+        )
+    return redirect(reverse('tweetCreate', args=[ISBNcode]))
         
-####################################################
 
 @login_required
 def tweet_del(request, tweet_pk):
@@ -200,7 +213,6 @@ class userPageView(LoginRequiredMixin,generic.ListView):
         queryset = super().get_queryset(**kwargs)
         tweetUser = CustomUser.objects.get(id=self.kwargs['pk'])
         queryset=queryset.filter(user=tweetUser)
-        
         return queryset
 
     def get_context_data(self,**kwargs):
@@ -258,7 +270,6 @@ class CreateComment(LoginRequiredMixin,generic.CreateView):
         url=self.request.META['HTTP_REFERER']
         return url
     
-
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
         context['tweet']=TweetModel.objects.get(id=self.kwargs['tweet_pk'])
@@ -389,7 +400,7 @@ class SearchItem(LoginRequiredMixin,generic.View):
                 'outOfStockFlag':1,
             }
             items=get_api_data(params)
-            game_data=[]
+            book_data=[]
             for i in items:
                 item=i['Item']
                 title=item['title']
@@ -397,16 +408,18 @@ class SearchItem(LoginRequiredMixin,generic.View):
                 author=item['author']
                 itemPrice=item['itemPrice']
                 ISBNcode=item['isbn']
+                itemUrl=item['itemUrl']
                 query={
                     'title':title,
                     'image':image,
                     'author':author,
                     'itemPrice':itemPrice,
                     'ISBNcode':ISBNcode,
+                    'itemUrl':itemUrl,
                 }
-                game_data.append(query)
+                book_data.append(query)
             return render(request,'Itemlist.html',{
-                'game_data':game_data,
+                'book_data':book_data,
                 'keyword':keyword,
                 'form':form,
                 'booksGenreId':booksGenreId,
@@ -424,7 +437,7 @@ def SearchByCategory(request,From,booksGenreId):
         'outOfStockFlag':1,
     }
     items=get_api_data(params)
-    game_data=[]
+    book_data=[]
     for i in items:
         item=i['Item']
         title=item['title']
@@ -432,18 +445,30 @@ def SearchByCategory(request,From,booksGenreId):
         author=item['author']
         itemPrice=item['itemPrice']
         ISBNcode=item['isbn']
+        itemUrl=item['itemUrl']
         query={
             'title':title,
             'image':image,
             'author':author,
             'itemPrice':itemPrice,
             'ISBNcode':ISBNcode,
+            'itemUrl':itemUrl,
         }
-        game_data.append(query)
+        book_data.append(query)
 
     return render(request,'Itemlist.html',{
-                'game_data':game_data,
+                'book_data':book_data,
                 'form':form,
                 'booksGenreId':booksGenreId,
                 'From':From,
             })
+
+class TweetOfItemView(LoginRequiredMixin,generic.ListView):
+    model=TweetModel
+    template_name='tweet_of_item.html'
+    context_object_name = 'tweetmodel_list'
+
+    def get_queryset(self,**kwargs):
+        queryset = super().get_queryset(**kwargs)
+        queryset=queryset.filter(book__ISBNcode=self.kwargs['ISBNcode']).order_by('-created_at')
+        return queryset

@@ -60,16 +60,24 @@ class CustomUser(AbstractUser):
     class Meta(AbstractUser.Meta):
         swappable = 'AUTH_USER_MODEL'
 
+class BookData(models.Model):
+    ISBNcode=models.CharField(primary_key=True,max_length=30)
+    title=models.CharField(max_length=100)
+    author=models.CharField(max_length=30)
+    itemPrice=models.CharField(max_length=30)
+    itemUrl=models.CharField(max_length=100)
+    imageUrl=models.CharField(max_length=100)
+
 class TweetModel(models.Model):
-    title=models.CharField(max_length=70,blank=True)
-    content=models.TextField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now,blank=True)
+    content=models.TextField()
     user=models.ForeignKey(CustomUser,verbose_name='紐づくユーザー',on_delete=models.CASCADE,blank=True)
-    rating=models.IntegerField(blank=True)
-    snsImage=models.ImageField(null=True,blank=True,upload_to='')
-    ISBNcode=models.CharField(max_length=30,blank=True)
+    rating=models.IntegerField()
+    book=models.ForeignKey(BookData,verbose_name='紐づく本',on_delete=models.CASCADE,blank=True)
 
     def __str__(self):
-        return self.title[:10]
+        return self.content[:10]
+
 
 class Comment(models.Model):
     user=models.ForeignKey(CustomUser, on_delete=models.CASCADE)
