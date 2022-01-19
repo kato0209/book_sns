@@ -90,4 +90,8 @@ input:-webkit-autofill:active{
 #id_category{
   margin-right: 10px;
 }
-
+.star{
+  font-size: 1.33333em;
+  color: gray;
+  cursor: pointer;
+}

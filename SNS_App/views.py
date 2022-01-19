@@ -85,14 +85,13 @@ def TweetCreate(request,ISBNcode):
             tweet.save()
             return redirect('home')
         else:
-            title=request.session.get('title') 
             title=book.title
-            return render(request,'tweet.html',{'form':form,'ISBNcode':ISBNcode,'title':title,'error':'投稿に失敗しました'})
+            return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'title':title})
     else:
         form=TweetCreationForm()
         book=BookData.objects.get(ISBNcode=ISBNcode)
         title=book.title
-        return render(request,'tweet.html',{'form':form,'ISBNcode':ISBNcode,'title':title})
+        return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'title':title})
 
 @login_required
 def SelectItem(request):
@@ -126,7 +125,7 @@ def SelectedItem(request,ISBNcode):
 def tweet_del(request, tweet_pk):
     tweet = get_object_or_404(TweetModel, pk=tweet_pk)
     tweet.delete()
-    return redirect('home')
+    return redirect(request.META['HTTP_REFERER'])
 
 @login_required
 def comment_del(request, comment_pk):
@@ -357,7 +356,6 @@ def room(request,pk):
 
     return HttpResponseRedirect(reverse('chat_room', args=[room.id,User2.id]))
 
-
 #RakutenAPI
 SEARCH_URL='https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&applicationId='+env('APPLICATIONID')
 
@@ -379,25 +377,30 @@ class SearchItem(LoginRequiredMixin,generic.View):
         if form.is_valid():
             keyword=form.cleaned_data['title']
             booksGenreId=form.cleaned_data['category']
+            page=form.cleaned_data['page']
             if booksGenreId and keyword:
                 params={
                 'title':keyword,
                 'booksGenreId':booksGenreId,
                 'outOfStockFlag':1,
+                'page':page,
             }
             elif keyword:
                 params={
                 'title':keyword,
                 'outOfStockFlag':1,
+                'page':page,
             }
             elif booksGenreId:
                 params={
                 'booksGenreId':booksGenreId,
                 'outOfStockFlag':1,
+                'page':page,
             }
             else:
                 params={
                 'outOfStockFlag':1,
+                'page':page,
             }
             items=get_api_data(params)
             book_data=[]
@@ -418,50 +421,20 @@ class SearchItem(LoginRequiredMixin,generic.View):
                     'itemUrl':itemUrl,
                 }
                 book_data.append(query)
+            for_range = [i for i in range(1,11)]
             return render(request,'Itemlist.html',{
                 'book_data':book_data,
                 'keyword':keyword,
                 'form':form,
                 'booksGenreId':booksGenreId,
                 'From':From,
+                'page':page,
+                'for_range':for_range,
             })
         return render(request,'Item-search.html',{
             'form':form,
             'From':From,
         })
-
-def SearchByCategory(request,From,booksGenreId):
-    form=RakutenSearchForm(initial={'category':booksGenreId})
-    params={
-        'booksGenreId':booksGenreId,
-        'outOfStockFlag':1,
-    }
-    items=get_api_data(params)
-    book_data=[]
-    for i in items:
-        item=i['Item']
-        title=item['title']
-        image=item['largeImageUrl']
-        author=item['author']
-        itemPrice=item['itemPrice']
-        ISBNcode=item['isbn']
-        itemUrl=item['itemUrl']
-        query={
-            'title':title,
-            'image':image,
-            'author':author,
-            'itemPrice':itemPrice,
-            'ISBNcode':ISBNcode,
-            'itemUrl':itemUrl,
-        }
-        book_data.append(query)
-
-    return render(request,'Itemlist.html',{
-                'book_data':book_data,
-                'form':form,
-                'booksGenreId':booksGenreId,
-                'From':From,
-            })
 
 class TweetOfItemView(LoginRequiredMixin,generic.ListView):
     model=TweetModel
