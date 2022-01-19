@@ -4,12 +4,14 @@
     border-color: gray;
     border: none;
   }
-
 .form-control:focus{
     box-shadow: none !important;
     outline: none;
     background-color: #212529;
     color:white;
+}
+.form-select{
+    width: 20%;
 }
 input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focus{
     -webkit-box-shadow: 0 0 0 1000px #212529 inset !important;
@@ -26,4 +28,9 @@ input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focu
 }
 .list-group-item:hover{
     background-color: #F2F2F2;
+}
+.select-category{
+    background-color: transparent;
+    border: None;
+    display: block;
 }

@@ -62,13 +62,13 @@
        {% endif %}
            <p name="{{tweet.id}}-count" class="count"> {{ tweet.like_set.count }} </p>
      </form>
-     <div class="rating ms-auto">
-       <span class="stars" id="star-1" name="{{tweet.rating}}">★</span>
-       <span class="stars" id="star-2" name="{{tweet.rating}}">★</span>
-       <span class="stars" id="star-3" name="{{tweet.rating}}">★</span>
-       <span class="stars" id="star-4" name="{{tweet.rating}}">★</span>
-       <span class="stars" id="star-5" name="{{tweet.rating}}">★</span>
-     </div>
+     <div class="stars ms-auto" name="{{ tweet.rating }}">
+      <span class="star" name="1">★</span>
+      <span class="star" name="2">★</span>
+      <span class="star" name="3">★</span>
+      <span class="star" name="4">★</span>
+      <span class="star" name="5">★</span>
+    </div>
     </div>
     <hr>
     <div class="comment">
@@ -102,9 +102,8 @@
 {% endblock content %}
 
 {% block footer %}
-<script src="{% static 'stars.js' %}"></script>
 <script src="{% static 'up_button.js' %}"></script>
-<script src="{% static 'tweet_del.js' %}"></script>
+<script src="{% static 'tweet.js' %}"></script>
 
 <script type="text/javascript">
 //いいね機能のajax処理

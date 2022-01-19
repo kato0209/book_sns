@@ -11,6 +11,9 @@
     background-color: #212529;
     color:white;
 }
+.form-select{
+    width: 20%;
+}
 input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focus{
     -webkit-box-shadow: 0 0 0 1000px #212529 inset !important;
     -webkit-text-fill-color: white;

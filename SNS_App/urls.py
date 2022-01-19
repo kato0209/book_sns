@@ -21,6 +21,5 @@ urlpatterns = [
     path('chat_room/<uuid:room_id>/<int:user_id>', chat_room, name='chat_room'),
     path('room/<int:pk>', room, name='room'),
     path('SearchItem/<str:From>',SearchItem.as_view(),name='SearchItem'),
-    path('SearchByCategory/<str:From>/<str:booksGenreId>',SearchByCategory,name='SearchByCategory'),
     path('TweetOfItem/<str:ISBNcode>',TweetOfItemView.as_view(),name='TweetOfItem'),
 ]

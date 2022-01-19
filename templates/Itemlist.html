@@ -7,11 +7,12 @@
 {% endblock head %}
 {% block content %}
 <div class="text-center my-5">
-    <form method="post" action="{% url 'SearchItem' From %}" class="d-flex">{% csrf_token %}
+    <form method="post" action="{% url 'SearchItem' From %}" class="d-flex" id="Search-form">{% csrf_token %}
         <div class="align-items-center w-100">
             {% render_field form.title class="form-control" placeholder="キーワードから探す"%}
         </div>
         {{ form.category}}
+        {{ form.page }}
         <button class="btn btn-success" type="submit">検索</button>
     </form>
 </div>
@@ -40,6 +41,66 @@
                 <p>該当するものはありません</p>
         {% endfor %}
     </div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          {% if page > 1 %}
+          <li class="page-item">
+            <button class="page-link" id="page-link-left" aria-label="Previous" name="{{ page }}">
+              <span aria-hidden="true">&laquo;</span>
+            </button>
+          </li>
+          {% endif %}
+
+          {% for num in for_range %}
+            {% if page == num %}
+                <li class="page-item active"><button class="page-link page-link-num">{{ num }}</button></li>
+            {% else %}
+                <li class="page-item"><button class="page-link page-link-num">{{ num }}</button></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if page < 10 %}
+          <li class="page-item">
+            <button class="page-link" id="page-link-right" aria-label="Next" name="{{ page }}">
+              <span aria-hidden="true">&raquo;</span>
+            </button>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
 </div>
 {% endblock content %}
 
+{% block footer %}
+<script type="text/javascript">
+
+var Input_page=document.getElementById("id_page");
+
+var pagingButtons=document.getElementsByClassName("page-link-num");
+for(const pagingButton of pagingButtons){
+  pagingButton.addEventListener("click", function (event) {
+    Input_page.value=this.innerHTML;
+    let form = document.getElementById("Search-form");
+    form.submit();
+});
+}
+
+if(document.getElementById("page-link-left")!=null){
+  var backButton=document.getElementById("page-link-left");
+  backButton.addEventListener("click",function (event){
+    Input_page.value=Number(this.name)-1;
+    let form = document.getElementById("Search-form");
+    form.submit();
+});
+}
+
+if(document.getElementById("page-link-right")!=null){
+  var nextButton=document.getElementById("page-link-right");
+  nextButton.addEventListener("click",function (event){
+    Input_page.value=Number(this.name)+1;
+    let form = document.getElementById("Search-form");
+    form.submit();
+  });
+}
+</script>
+{% endblock footer %}

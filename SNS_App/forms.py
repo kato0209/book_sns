@@ -4,7 +4,6 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import TweetModel,Comment
 
-
 class CustomUserCreationForm(forms.ModelForm):
 
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class' : 'form-control','placeholder': 'パスワード'}))
@@ -41,12 +40,8 @@ class TweetCreationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TweetCreationForm, self).__init__(*args, **kwargs)
         self.fields['content'].widget.attrs.update({'class' : 'form-control','placeholder':'感想を書こう!','autofocus' : 'autofocus'})
-
-
-    Choice=(
-        (None,'評価'),(1,1),(2,2),(3,3),(4,4),(5,5),
-    )
-    rating=forms.ChoiceField(choices=Choice,required=True)
+        
+    rating=forms.IntegerField(required=True)
 
     class Meta:
         model = TweetModel
@@ -83,6 +78,11 @@ class CreateCommentForm(forms.ModelForm):
         fields = ('text',)
     
 class RakutenSearchForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(RakutenSearchForm, self).__init__(*args, **kwargs)
+        self.fields['page'].initial = 1
+        self.fields['category'].widget.attrs.update({'class' : 'form-select'})
+
     BOOK_CHOICES = (
         ('001', '本全般'),
         ('001004001', 'ミステリー・サスペンス'),
@@ -101,3 +101,4 @@ class RakutenSearchForm(forms.Form):
         label='ジャンル',
     )
     title=forms.CharField(label='タイトル',max_length=200,required=False)
+    page=forms.IntegerField(widget=forms.HiddenInput)

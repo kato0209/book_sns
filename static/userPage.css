@@ -91,13 +91,9 @@ p.count{
     width: 90px;
     height: auto;
 }
-.stars{
+.star{
     font-size: 1.33333em;
     color: gray;
-}
-.stars-yellow{
-    font-size: 1.33333em;
-    color: yellow;
 }
 .comment a{
     color: white;

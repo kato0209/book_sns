@@ -40,28 +40,6 @@ body{
     background-color: transparent;
     color: #28a745;
 }
-
-.Search-form{
-    background-color:#212529;
-    border: none;
-    color: white;
-    width: auto;
-}
-.Search-form:focus{
-    background-color: #212529;
-    color: white;
-    box-shadow: none;
-}
-.Search-form:-webkit-autofill, .Search-form:-webkit-autofill:hover,.Search-form:-webkit-autofill:focus{
-    -webkit-box-shadow: 0 0 0 1000px #212529 inset !important;
-    -webkit-text-fill-color: white;
-    transition:0s;
-}
-input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focus{
-    -webkit-box-shadow: 0 0 0 1000px white inset !important;
-    -webkit-text-fill-color: black;
-    transition:0s;
-}
 .tweet-container{
     max-width: 800px;
     width: 80%;
@@ -76,8 +54,6 @@ input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focu
 .font-bold{
     font-size: 2.2rem;
 }
-
-
 .profile-container{
     margin-left: 5%;
     margin-right: 5%;

@@ -81,13 +81,9 @@ p.count{
 .font-bold{
     font-size: 2.2rem;
 }
-.stars{
+.star{
     font-size: 1.33333em;
     color: gray;
-}
-.stars-yellow{
-    font-size: 1.33333em;
-    color: yellow;
 }
 footer{
     background-color: #222;
