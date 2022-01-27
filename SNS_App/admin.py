@@ -15,7 +15,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = ['email','username','ProfileImage']
 
     fieldsets = UserAdmin.fieldsets + (
-            ('profile-image', {'fields': ('ProfileImage',)}),
+            (None, {'fields': ('ProfileImage',)}),
     )
 
 class MemberInlineAdmin(admin.TabularInline):
