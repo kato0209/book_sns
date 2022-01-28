@@ -322,7 +322,7 @@ class Chat(LoginRequiredMixin,generic.ListView):
         partner_dict=dict(zip(partner_list,message_list))
         context['room_list']=room_list
         context['partner_dict']=partner_dict
-        return context
+        return context 
 
 
 def chat_room(request, room_id,user_id):
