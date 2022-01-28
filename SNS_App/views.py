@@ -171,10 +171,14 @@ def LikeFunc(request):
         tweet=None
         comment=None
         
-        if request.POST.get('like-type')=='MainLike':
-            tweet = get_object_or_404(TweetModel, pk=request.POST.get('id'))
-        elif request.POST.get('like-type')=='SubLike':
-            comment = get_object_or_404(Comment, pk=request.POST.get('id'))
+        like_type=request.POST.get('like_type')
+        likeInfo=request.POST.get('likeInfo')
+        index=likeInfo.find('-')
+        id=likeInfo[index+1:]
+        if like_type =='tweet':
+            tweet = get_object_or_404(TweetModel, pk=id)
+        elif like_type =='comment':
+            comment = get_object_or_404(Comment, pk=id)
         user=request.user
         liked = False
         like = Like.objects.filter(tweet=tweet, user=user,comment=comment)
@@ -185,15 +189,14 @@ def LikeFunc(request):
             liked = True
 
         if tweet:
-            id=tweet.id
             count=tweet.like_set.count()
         elif comment:
-            id=comment.id
             count=comment.like_set.count()
 
         context={
             'id': id,
             'liked': liked,
+            'like_type':like_type,
             'count': count,
             }
     if request.is_ajax():
