@@ -1,1 +1,1 @@
-web: daphne -b 0.0.0.0 -p $PORT SNS_project.asgi:application -v2
+web: daphne SNS_project.asgi:application --port $PORT --bind 0.0.0.0 -v2 
