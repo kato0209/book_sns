@@ -161,8 +161,8 @@ if not DEBUG:
 
     CLOUDINARY_STORAGE  = {
       'CLOUD_NAME':'dvh5ehszr',
-      'API_KEY':os.environ('CLOUDINARY_API_KEY'),
-      'API_SECRET':os.environ('CLOUDINARY_API_SECRET'),
+      'API_KEY':os.environ['CLOUDINARY_API_KEY'],
+      'API_SECRET':os.environ['CLOUDINARY_API_SECRET'],
     }
 
 db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
