@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'widget_tweaks',
     'channels',
-    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
     'cloudinary',
 ]
 
