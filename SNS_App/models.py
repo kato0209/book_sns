@@ -4,6 +4,7 @@ from django.core.files.base import ContentFile
 from sorl.thumbnail import get_thumbnail, delete
 from django.utils import timezone
 import uuid
+from SNS_project import settings
 
 class CustomUserManager(UserManager):
     use_in_migrations = True
@@ -55,7 +56,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=10, blank=False)
     profile=models.TextField(max_length=150,blank=True,null=True)
-    ProfileImage=models.ImageField(upload_to='',default='kuma.png')
+    ProfileImage=models.ImageField(upload_to='',default=settings.Default_image)
 
     class Meta(AbstractUser.Meta):
         swappable = 'AUTH_USER_MODEL'

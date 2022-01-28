@@ -155,6 +155,7 @@ if not DEBUG:
     SECRET_KEY = os.environ['SECRET_KEY']
     PASSWORD=os.environ['PASSWORD']
     APPLICARIONID=os.environ['APPLICATIONID']
+    Default_image='media/kuma_default'
     import django_heroku
     django_heroku.settings(locals())
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
