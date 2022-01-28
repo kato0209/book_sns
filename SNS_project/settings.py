@@ -23,10 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -75,14 +74,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'SNS_project.wsgi.application'
 ASGI_APPLICATION = 'SNS_project.routing.application'
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer", 
-        "CONFIG": {
-            "hosts": ['redis://:'+os.environ['PASSWORD']+'@127.0.0.1:6379']
-        }
-    }
-}
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -151,17 +142,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'SNS_App.CustomUser'
 
+
 try:
     from .local_settings import *
 except ImportError:
     pass
 
+
 if not DEBUG:
     SECRET_KEY = os.environ['SECRET_KEY']
-    APPLICARIONID=os.environ['APPLICARIONID']
+    PASSWORD=os.environ['PASSWORD']
+    APPLICARIONID=os.environ['APPLICATIONID']
     import django_heroku
     django_heroku.settings(locals())
 
 db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
 DATABASES['default'].update(db_from_env)
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer", 
+        "CONFIG": {
+            "hosts": ['redis://:'+PASSWORD+'@127.0.0.1:6379']
+        }
+    }
+}
