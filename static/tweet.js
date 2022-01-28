@@ -1,18 +1,16 @@
-//プレビュー画像の表示
-document.getElementById('id_snsImage').addEventListener('change', function (e) {
-    
-    var file = e.target.files[0];
+const deleteModalButtons = document.getElementsByClassName('del_confirm');
+const deleteButton = document.getElementById('del_url');
 
-    var fileReader = new FileReader();
-    fileReader.onload = function() {
-        
-        var dataUri = this.result;
+for (const button of deleteModalButtons) {
+    button.addEventListener('click', function() {
+    deleteButton.setAttribute("href",button.dataset.deleteurl)
+   });
+}
 
-        var img = document.getElementById('file-preview');
-        img.src = dataUri;
+const STARS=document.getElementsByClassName('star');
+for(const star of STARS){
+    var rating=star.parentNode.getAttribute('name');
+    if(star.getAttribute('name')<=rating){
+        star.style.color='yellow';
     }
-    
-    fileReader.readAsDataURL(file);
-});
-
-
+}

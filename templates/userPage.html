@@ -46,17 +46,36 @@
       {% endif %}
       </p>
       <p class="tweet-text">{{ tweet.content | linebreaksbr }}</p>
-      {% if tweet.snsImage %}
-      <p><img src="{{ tweet.snsImage.url }}" width="70%" style="border-radius: 5%;" class="bg-light"></p>
-      {% endif %}
-    <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
-      {% if tweet.id in liked_list %}
-          <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="fas fa-lg fa-heart like-after"></i></button>
-      {% else %}
-          <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="far fa-lg fa-heart like-before"></i></button>      
-      {% endif %}
-          <p name="{{tweet.id}}-count" class="count"> {{ tweet.like_set.count }} </p>
-    </form>
+      <div class="d-flex book-container border border-secondary">
+        <img src="{{ tweet.book.imageUrl }}" alt="" class="book-img me-3">
+        <div>
+         <h6><a href="{{ tweet.book.itemUrl }}" class="book-title">{{ tweet.book.title}}</a></h6>
+         <p class="text-primary">{{ tweet.book.author }}</p>
+        </div>
+      </div>
+    <div class="d-flex">
+     <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
+       {% if tweet.id in liked_list %}
+           <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="fas fa-lg fa-heart like-after"></i></button>
+       {% else %}
+           <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="far fa-lg fa-heart like-before"></i></button>      
+       {% endif %}
+           <p name="{{tweet.id}}-count" class="count"> {{ tweet.like_set.count }} </p>
+     </form>
+     <div class="stars ms-auto" name="{{ tweet.rating }}">
+      <span class="star" name="1">★</span>
+      <span class="star" name="2">★</span>
+      <span class="star" name="3">★</span>
+      <span class="star" name="4">★</span>
+      <span class="star" name="5">★</span>
+    </div>
+    </div>
+    <hr>
+    <div class="comment">
+     <a href="{% url 'CreateComment' tweet.id %}" class="me-3" role="button" aria-pressed="true">
+      コメント>
+     </a>
+   </div>
   </div>
 {% endfor %}
   <button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
@@ -84,7 +103,7 @@
 
 {% block footer %}
 <script src="{% static 'up_button.js' %}"></script>
-<script src="{% static 'tweet_del.js' %}"></script>
+<script src="{% static 'tweet.js' %}"></script>
 
 <script type="text/javascript">
 //いいね機能のajax処理

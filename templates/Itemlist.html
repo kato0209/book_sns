@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load widget_tweaks%}
+{% load static %}
+
+{% block head %}
+<link href="{% static 'Itemlist.css' %}" rel="stylesheet"> 
+{% endblock head %}
+{% block content %}
+<div class="text-center my-5">
+    <form method="post" action="{% url 'SearchItem' From %}" class="d-flex" id="Search-form">{% csrf_token %}
+        <div class="align-items-center w-100">
+            {% render_field form.title class="form-control" placeholder="キーワードから探す"%}
+        </div>
+        {{ form.category}}
+        {{ form.page }}
+        <button class="btn btn-success" type="submit">検索</button>
+    </form>
+</div>
+<div class="container my-5">
+    <div class="mb-5 border-bottom">
+        {% if keyword %}
+        <h3>「{{ keyword }}」の検索結果</h3>
+        {% endif %}
+    </div>
+    <div class="bookList">
+        {% for book in book_data %}
+            <div class="bookTag">
+                    <img src="{{ book.image }}" alt="" class="book-img me-3">
+                    <div class="px-2 py-3">
+                        <h5><a href="{{ book.itemUrl }}" class="book-title">{{book.title}}</a></h5>
+                        <p class="text-primary">{{book.author}}</p>
+                        <h3 class="text-warning">{{book.itemPrice}}円<sub class="text-secondary">(税込み)</sub></h3>
+                    </div>
+                    {% if From == "Select" %}
+                     <div class="ms-auto"><a href="{% url 'SelectedItem' book.ISBNcode %}" class="btn btn-success" role="button" aria-pressed="true">選択</a></div>
+                    {% elif From == "Search" %}
+                    <div class="ms-auto"><a href="{% url 'TweetOfItem' book.ISBNcode %}" class="btn btn-success" role="button" aria-pressed="true">みんなの投稿を見る</a></div>
+                    {% endif %}
+            </div>
+        {% empty %}
+                <p>該当するものはありません</p>
+        {% endfor %}
+    </div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          {% if page > 1 %}
+          <li class="page-item">
+            <button class="page-link" id="page-link-left" aria-label="Previous" name="{{ page }}">
+              <span aria-hidden="true">&laquo;</span>
+            </button>
+          </li>
+          {% endif %}
+
+          {% for num in for_range %}
+            {% if page == num %}
+                <li class="page-item active"><button class="page-link page-link-num">{{ num }}</button></li>
+            {% else %}
+                <li class="page-item"><button class="page-link page-link-num">{{ num }}</button></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if page < 10 %}
+          <li class="page-item">
+            <button class="page-link" id="page-link-right" aria-label="Next" name="{{ page }}">
+              <span aria-hidden="true">&raquo;</span>
+            </button>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+</div>
+{% endblock content %}
+
+{% block footer %}
+<script type="text/javascript">
+
+var Input_page=document.getElementById("id_page");
+
+var pagingButtons=document.getElementsByClassName("page-link-num");
+for(const pagingButton of pagingButtons){
+  pagingButton.addEventListener("click", function (event) {
+    Input_page.value=this.innerHTML;
+    let form = document.getElementById("Search-form");
+    form.submit();
+});
+}
+
+if(document.getElementById("page-link-left")!=null){
+  var backButton=document.getElementById("page-link-left");
+  backButton.addEventListener("click",function (event){
+    Input_page.value=Number(this.name)-1;
+    let form = document.getElementById("Search-form");
+    form.submit();
+});
+}
+
+if(document.getElementById("page-link-right")!=null){
+  var nextButton=document.getElementById("page-link-right");
+  nextButton.addEventListener("click",function (event){
+    Input_page.value=Number(this.name)+1;
+    let form = document.getElementById("Search-form");
+    form.submit();
+  });
+}
+</script>
+{% endblock footer %}

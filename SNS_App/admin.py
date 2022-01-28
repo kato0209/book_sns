@@ -15,7 +15,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = ['email','username','ProfileImage']
 
     fieldsets = UserAdmin.fieldsets + (
-            ('profile-image', {'fields': ('ProfileImage',)}),
+            (None, {'fields': ('ProfileImage',)}),
     )
 
 class MemberInlineAdmin(admin.TabularInline):
@@ -28,8 +28,8 @@ admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(TweetModel)
 admin.site.register(Like)
 admin.site.register(Connection)
-admin.site.register(Category)
 admin.site.register(Comment)
 admin.site.register(Room,RoomAdmin)
 admin.site.register(Message)
 admin.site.register(Entries)
+admin.site.register(BookData)

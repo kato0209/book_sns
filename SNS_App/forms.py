@@ -2,8 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import TweetModel,Category,Comment
-
+from .models import TweetModel,Comment
 
 class CustomUserCreationForm(forms.ModelForm):
 
@@ -40,19 +39,9 @@ class TweetCreationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TweetCreationForm, self).__init__(*args, **kwargs)
-        self.fields['title'].widget.attrs.update({'class' : 'form-control','placeholder':'タイトル','autofocus' : 'autofocus'})
-        self.fields['content'].widget.attrs.update({'class' : 'form-control','placeholder':'ここに文章を入力'})
-        self.fields['category'].widget.attrs.update({'class' : 'form-select'})
-    
-    category = forms.ModelChoiceField(
-        queryset=Category.objects.all(),
-        empty_label='カテゴリを選択してください'
-    )
-
-    Choice=(
-        (None,'評価'),(1,1),(2,2),(3,3),(4,4),(5,5),
-    )
-    rating=forms.ChoiceField(choices=Choice,required=True)
+        self.fields['content'].widget.attrs.update({'class' : 'form-control','placeholder':'感想を書こう!','autofocus' : 'autofocus'})
+        
+    rating=forms.IntegerField(required=True)
 
     class Meta:
         model = TweetModel
@@ -87,3 +76,29 @@ class CreateCommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ('text',)
+    
+class RakutenSearchForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(RakutenSearchForm, self).__init__(*args, **kwargs)
+        self.fields['page'].initial = 1
+        self.fields['category'].widget.attrs.update({'class' : 'form-select'})
+
+    BOOK_CHOICES = (
+        ('001', '本全般'),
+        ('001004001', 'ミステリー・サスペンス'),
+        ('001004002', 'SF・ホラー'),
+        ('001004003', 'エッセイ'),
+        ('001004004', 'ノンフィクション'),
+        ('001004008', '日本の小説'),
+        ('001004009', '外国の小説'),
+        ('001004016', 'ロマンス'),
+        ('001017', 'ライトノベル'),
+    )
+
+    category = forms.fields.ChoiceField(
+        choices=BOOK_CHOICES,
+        required=False,
+        label='ジャンル',
+    )
+    title=forms.CharField(label='タイトル',max_length=200,required=False)
+    page=forms.IntegerField(widget=forms.HiddenInput)

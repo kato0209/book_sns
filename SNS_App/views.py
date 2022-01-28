@@ -9,6 +9,11 @@ from django.urls import reverse_lazy,reverse
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse,HttpResponseRedirect, HttpResponse
 from django.template import loader
+import requests
+import json
+import os
+import environ
+from SNS_project import settings 
 
 class signupView(generic.CreateView):
     model=get_user_model()
@@ -44,6 +49,7 @@ class HomeView(LoginRequiredMixin,generic.ListView):
 
     def get_queryset(self,**kwargs):
         queryset = super().get_queryset(**kwargs)
+        queryset=queryset.exclude(user=self.request.user)
         keyword=self.request.GET.get('keyword')
         if keyword:
             queryset=queryset.filter(content__icontains=keyword)
@@ -58,27 +64,64 @@ class HomeView(LoginRequiredMixin,generic.ListView):
             liked = tweet.like_set.filter(user=self.request.user)
             if liked.exists():
                 liked_list.append(tweet.id)
-
+        
         context['liked_list']=liked_list
         return context
 
-class TweetView(LoginRequiredMixin,generic.CreateView):
-    template_name='tweet.html'
-    model=TweetModel
-    form_class=TweetCreationForm
-    success_url=reverse_lazy('home')
 
-    def form_valid(self, form):
-        tweet=form.save(commit=False)
-        tweet.user = self.request.user   
-        tweet.save()
-        return super().form_valid(form)
+@login_required
+def TweetCreate(request,ISBNcode):
+    if request.method == "POST":
+        form=TweetCreationForm(request.POST)
+        book=BookData.objects.get(ISBNcode=ISBNcode)
+        if form.is_valid():
+            tweet=form.save(commit=False)
+            tweet.user = request.user   
+            tweet.book=book
+            tweet.save()
+            return redirect('home')
+        else:
+            title=book.title
+            return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'title':title})
+    else:
+        form=TweetCreationForm()
+        book=BookData.objects.get(ISBNcode=ISBNcode)
+        title=book.title
+        return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'title':title})
+
+@login_required
+def SelectItem(request):
+    return render(request,'book_select.html')
+
+@login_required
+def SelectedItem(request,ISBNcode):
+    Item=get_api_data(params={'isbn':ISBNcode})
+    item=Item[0]['Item']
+    book=BookData.objects.filter(ISBNcode=ISBNcode)
+    if book.exists():
+        book=book[0]
+        book.title=item['title']
+        book.author=item['author']
+        book.itemPrice=item['itemPrice']
+        book.itemUrl=item['itemUrl']
+        book.ImageUrl=item['largeImageUrl']
+    else:
+        book.create(
+            ISBNcode=ISBNcode,
+            title=item['title'],
+            author=item['author'],
+            itemPrice=item['itemPrice'],
+            itemUrl=item['itemUrl'],
+            imageUrl=item['largeImageUrl']
+        )
+    return redirect(reverse('tweetCreate', args=[ISBNcode]))
+        
 
 @login_required
 def tweet_del(request, tweet_pk):
     tweet = get_object_or_404(TweetModel, pk=tweet_pk)
     tweet.delete()
-    return redirect('home')
+    return redirect(request.META['HTTP_REFERER'])
 
 @login_required
 def comment_del(request, comment_pk):
@@ -91,6 +134,7 @@ class profile_editView(LoginRequiredMixin,generic.UpdateView):
     form_class=CustomUserChangeForm
     template_name='profile_edit.html'
     success_url = reverse_lazy('home')
+
 
 class SearchUserView(LoginRequiredMixin,generic.ListView):
     model=CustomUser
@@ -164,7 +208,6 @@ class userPageView(LoginRequiredMixin,generic.ListView):
         queryset = super().get_queryset(**kwargs)
         tweetUser = CustomUser.objects.get(id=self.kwargs['pk'])
         queryset=queryset.filter(user=tweetUser)
-        
         return queryset
 
     def get_context_data(self,**kwargs):
@@ -222,7 +265,6 @@ class CreateComment(LoginRequiredMixin,generic.CreateView):
         url=self.request.META['HTTP_REFERER']
         return url
     
-
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
         context['tweet']=TweetModel.objects.get(id=self.kwargs['tweet_pk'])
@@ -295,6 +337,7 @@ def chat_room(request, room_id,user_id):
     }
     return HttpResponse(template.render(context, request))
 
+@login_required
 def room(request,pk):
     User1=request.user
     User2=CustomUser.objects.get(pk=pk)
@@ -309,3 +352,92 @@ def room(request,pk):
 
     return HttpResponseRedirect(reverse('chat_room', args=[room.id,User2.id]))
 
+#RakutenAPI
+SEARCH_URL='https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&applicationId='+os.environ['APPLICATIONID']
+
+def get_api_data(params):
+        api=requests.get(SEARCH_URL,params=params).text
+        result=json.loads(api)
+        items=result['Items']
+        return items
+
+class SearchItem(LoginRequiredMixin,generic.View):
+    def get(self, request, *args, **kwargs):
+        From=self.kwargs['From']
+        form=RakutenSearchForm()
+        return render(request,'Item-search.html',{'form':form,'From':From})
+
+    def post(self, request, *args, **kwargs):
+        form=RakutenSearchForm(request.POST or None)
+        From=self.kwargs['From']
+        if form.is_valid():
+            keyword=form.cleaned_data['title']
+            booksGenreId=form.cleaned_data['category']
+            page=form.cleaned_data['page']
+            if booksGenreId and keyword:
+                params={
+                'title':keyword,
+                'booksGenreId':booksGenreId,
+                'outOfStockFlag':1,
+                'page':page,
+            }
+            elif keyword:
+                params={
+                'title':keyword,
+                'outOfStockFlag':1,
+                'page':page,
+            }
+            elif booksGenreId:
+                params={
+                'booksGenreId':booksGenreId,
+                'outOfStockFlag':1,
+                'page':page,
+            }
+            else:
+                params={
+                'outOfStockFlag':1,
+                'page':page,
+            }
+            items=get_api_data(params)
+            book_data=[]
+            for i in items:
+                item=i['Item']
+                title=item['title']
+                image=item['largeImageUrl']
+                author=item['author']
+                itemPrice=item['itemPrice']
+                ISBNcode=item['isbn']
+                itemUrl=item['itemUrl']
+                query={
+                    'title':title,
+                    'image':image,
+                    'author':author,
+                    'itemPrice':itemPrice,
+                    'ISBNcode':ISBNcode,
+                    'itemUrl':itemUrl,
+                }
+                book_data.append(query)
+            for_range = [i for i in range(1,11)]
+            return render(request,'Itemlist.html',{
+                'book_data':book_data,
+                'keyword':keyword,
+                'form':form,
+                'booksGenreId':booksGenreId,
+                'From':From,
+                'page':page,
+                'for_range':for_range,
+            })
+        return render(request,'Item-search.html',{
+            'form':form,
+            'From':From,
+        })
+
+class TweetOfItemView(LoginRequiredMixin,generic.ListView):
+    model=TweetModel
+    template_name='tweet_of_item.html'
+    context_object_name = 'tweetmodel_list'
+
+    def get_queryset(self,**kwargs):
+        queryset = super().get_queryset(**kwargs)
+        queryset=queryset.filter(book__ISBNcode=self.kwargs['ISBNcode']).order_by('-created_at')
+        return queryset

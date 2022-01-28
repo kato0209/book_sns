@@ -28,10 +28,6 @@
     border-left:1px solid #333;
     border-right:1px solid #333;
 }
-
-.marginTop{
-    margin-top: 10px;
-}
 body{
     background-color: #222;
     color: white;
@@ -56,7 +52,16 @@ body{
     color: white;
     box-shadow: none;
 }
-
+.Search-form:-webkit-autofill, .Search-form:-webkit-autofill:hover,.Search-form:-webkit-autofill:focus{
+    -webkit-box-shadow: 0 0 0 1000px #212529 inset !important;
+    -webkit-text-fill-color: white;
+    transition:0s;
+}
+input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focus{
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: black;
+    transition:0s;
+}
 .tweet-container{
     max-width: 800px;
     width: 80%;
@@ -64,7 +69,6 @@ body{
     margin-top: 20px;
     padding: 25px;
 }
-
 .tweet-text{
     word-break: break-all;
 }
@@ -119,11 +123,20 @@ p.count{
 .comment a:hover{
     color: gray;
 }
-.stars{
+.star{
     font-size: 1.33333em;
     color: gray;
 }
-.stars-yellow{
-    font-size: 1.33333em;
-    color: yellow;
+.book-container{
+    width: 90%;
+    border-radius: 30px;
+    margin: 30px auto 20px auto;
+    padding: 25px;
+}
+.book-title{
+    text-decoration: none;
+}
+.book-img{
+    width: 90px;
+    height: auto;
 }

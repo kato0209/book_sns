@@ -24,10 +24,13 @@
           {% endif %}
         </p>
         <p class="tweet-text">{{ tweet.content | linebreaksbr }}</p>
-        {% if tweet.snsImage %}
-        <p><img src="{{ tweet.snsImage.url }}" width="70%" style="border-radius: 5%;" class="bg-light"></p>
-        {% endif %}
-
+        <div class="d-flex book-container border border-secondary">
+          <img src="{{ tweet.book.imageUrl }}" alt="" class="book-img me-3">
+          <div>
+           <h6><a href="{{ tweet.book.itemUrl }}" class="book-title">{{ tweet.book.title}}</a></h6>
+           <p class="text-primary">{{ tweet.book.author }}</p>
+          </div>
+       </div>
       <div class="d-flex">
         <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
             {% if liked %}
@@ -37,12 +40,12 @@
             {% endif %}
             <p name="{{tweet.id}}-count" class="count"> {{ tweet.like_set.count }} </p>
         </form>
-        <div class="rating ms-auto">
-          <span class="stars" id="star-1" name="{{tweet.rating}}">★</span>
-          <span class="stars" id="star-2" name="{{tweet.rating}}">★</span>
-          <span class="stars" id="star-3" name="{{tweet.rating}}">★</span>
-          <span class="stars" id="star-4" name="{{tweet.rating}}">★</span>
-          <span class="stars" id="star-5" name="{{tweet.rating}}">★</span>
+        <div class="stars ms-auto" name="{{ tweet.rating }}">
+          <span class="star" name="1">★</span>
+          <span class="star" name="2">★</span>
+          <span class="star" name="3">★</span>
+          <span class="star" name="4">★</span>
+          <span class="star" name="5">★</span>
         </div>
       </div>
     </div>
@@ -113,7 +116,7 @@
 {% block footer %}
 <script src="{% static 'up_button.js' %}"></script>
 <script src="{% static 'Comment.js' %}"></script>
-<script src="{% static 'tweet_del.js' %}"></script>
+<script src="{% static 'tweet.js' %}"></script>
 
 <!--いいね機能のAjax処理-->
 <script type="text/javascript">

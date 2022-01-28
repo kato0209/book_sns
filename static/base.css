@@ -32,6 +32,9 @@ nav{
     border-left:1px solid #333;
     border-right:1px solid #333;
 }
+.btn{
+    white-space: nowrap;
+}
 body{
     background-color: #222;
     color: white;
