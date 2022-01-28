@@ -353,7 +353,7 @@ def room(request,pk):
     return HttpResponseRedirect(reverse('chat_room', args=[room.id,User2.id]))
 
 #RakutenAPI
-SEARCH_URL='https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&applicationId='+os.environ['APPLICATIONID']
+SEARCH_URL='https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&applicationId='+settings.APPLICARIONID
 
 def get_api_data(params):
         api=requests.get(SEARCH_URL,params=params).text
