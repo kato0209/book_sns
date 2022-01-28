@@ -17,30 +17,35 @@ from django.core.serializers.json import DjangoJSONEncoder
 class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
-        print(66)
+        print(6)
         try:
             await self.accept()
-            print(77)
+            print(7)
             self.room_group_name = self.scope['url_route']['kwargs']['room_name']
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name
             )
+            print(8)
         except Exception as e:
             print(e)
 
     async def disconnect(self, close_code):
+        print(9)
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
+        print(2)
         await self.close()
 
     async def receive(self, text_data):
         try:
+            print(3)
             text_data_json = json.loads(text_data)
             message = text_data_json['message']
             created_at=await self.createMessage(text_data_json)
+            print(create_at)
             created_time=created_at.strftime('%H:%M')
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -50,23 +55,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'user_id':text_data_json['user_id'],
                     'created_time':created_time
                 }
-            )
+            )print(4)
         except Exception as e:
             print(e)
 
     async def chat_message(self, event):
         try:
+            print(5)
             message = event['message']
             await self.send(text_data=json.dumps({
                 'message': message,
                 'user_id':event['user_id'],
                 'created_time':event['created_time']
-            }))
+            }))print(88)
         except Exception as e:
             print(e)
 
     @database_sync_to_async
     def createMessage(self, event):
+        print(99)
         try:
             room = Room.objects.get(
                 id=self.room_group_name
