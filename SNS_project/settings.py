@@ -158,6 +158,7 @@ except ImportError:
 
 if not DEBUG:
     SECRET_KEY = os.environ['SECRET_KEY']
+    APPLICARIONID=os.environ['APPLICARIONID']
     import django_heroku
     django_heroku.settings(locals())
 
