@@ -55,7 +55,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'user_id':text_data_json['user_id'],
                     'created_time':created_time
                 }
-            )print(4)
+            )
+            print(4)
         except Exception as e:
             print(e)
 
@@ -67,7 +68,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'message': message,
                 'user_id':event['user_id'],
                 'created_time':event['created_time']
-            }))print(88)
+            }))
+            print(88)
         except Exception as e:
             print(e)
 
