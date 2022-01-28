@@ -17,8 +17,10 @@ from django.core.serializers.json import DjangoJSONEncoder
 class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
+        print(66)
         try:
             await self.accept()
+            print(77)
             self.room_group_name = self.scope['url_route']['kwargs']['room_name']
             await self.channel_layer.group_add(
                 self.room_group_name,
