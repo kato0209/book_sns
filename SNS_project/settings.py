@@ -35,11 +35,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'SNS_App.apps.SnsAppConfig',
     'sorl.thumbnail',
     'widget_tweaks',
     'channels',
+    'cloudinary_storage',
+    'django.contrib.staticfiles',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -155,6 +157,13 @@ if not DEBUG:
     APPLICARIONID=os.environ['APPLICATIONID']
     import django_heroku
     django_heroku.settings(locals())
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+    CLOUDINARY_STORAGE  = {
+      'CLOUD_NAME':'dvh5ehszr',
+      'API_KEY':env('CLOUDINARY_API_KEY'),
+      'API_SECRET':env('CLOUDINARY_API_SECRET'),
+    }
 
 db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
 DATABASES['default'].update(db_from_env)
@@ -167,3 +176,4 @@ CHANNEL_LAYERS = {
         }
     }
 }
+
