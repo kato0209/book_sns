@@ -40,7 +40,7 @@
 <script src="{% static 'chat_room.js' %}"></script>
 
 <script>
-const url = 'ws://localhost:8000/ws/' + '{{ room.id }}'
+const url = 'ws://book-sns-0209.herokuapp.com/ws/' + '{{ room.id }}'
 var ws = new WebSocket(url)
 
 document.getElementById("send").onclick = function sendMessage () {
