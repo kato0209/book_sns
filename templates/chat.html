@@ -6,6 +6,8 @@
 {% endblock head %}
 {% block content %}
 <!-- room_list -->
+
+{% if partner_dict %}
 {% for partner,message in partner_dict.items %}
   <div class="user-container container border border-secondary">
     <div class="font-bold d-flex flex-wrap">
@@ -24,5 +26,6 @@
     </div>
   </div>
 {% endfor %}
+{% endif %}
 <!---------------->
 {% endblock content %}
