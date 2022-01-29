@@ -318,19 +318,14 @@ class Chat(LoginRequiredMixin,generic.ListView):
 
         for room in room_list:
             partner=room.room_member.all().exclude(id=user.id)[0]
-            if room.message_set.order_by('-created_at'):
-                print(111)
-                print(room.message_set.order_by('-created_at'))
+            if room.message_set:
                 message=room.message_set.order_by('-created_at')[0]
                 message_list.append(message)
                 partner_list.append(partner)
             
-        print(33)
         partner_dict=dict(zip(partner_list,message_list))
-        print(222)
         context['room_list']=room_list
         context['partner_dict']=partner_dict
-        print(100)
         return context
 
 
