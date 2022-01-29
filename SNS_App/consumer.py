@@ -89,9 +89,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 content=event['message'],
                 created_at=localtime(timezone.now())
             )
+            print(50)
             entry=Entries.objects.get(user=user,room=room)
             entry.joined_at=_Message.created_at
             entry.save()
+            print(_Message.created_at)
             return _Message.created_at
         except Exception as e:
             print(e)
