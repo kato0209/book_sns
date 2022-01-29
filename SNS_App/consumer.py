@@ -47,8 +47,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             text_data_json = json.loads(text_data)
             message = text_data_json['message']
             created_at=await self.createMessage(text_data_json)
-            print(create_at)
+            print(created_at)
             created_time=created_at.strftime('%H:%M')
+            print(self.channel_layer)
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
