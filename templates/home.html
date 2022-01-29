@@ -14,7 +14,7 @@
 <!-- navbar(検索フォーム付き) -->
 <nav class="navbar bg-dark sticky-top mb-3">
   <div class="container-fluid">
-    <a class="navbar-brand navbarTextColor"><i class="far fa-smile-beam smileIcon"></i>SNS_App</a>
+    <a class="navbar-brand navbarTextColor"><i class="far fa-smile-beam smileIcon"></i>BOOK_SNS</a>
 
     <ul class="nav nav-pills">
       <li class="nav-item"><a href="{% url 'home' %}" class="nav-link">ホーム</a></li>
@@ -23,7 +23,7 @@
       <li class="nav-item"><a href="{% url 'userPage' user.id %}" class="nav-link">マイページ</a></li>
     </ul>
 
-    <form method="GET" class="d-flex" action="{% url 'search_user' %}">
+    <form method="GET" class="d-flex ms-auto Search-user" action="{% url 'search_user' %}">
       <input class="form-control" type="text" placeholder="ユーザーを検索" aria-label="Search" name="keyword_user">
       <button class="btn btn-success" type="submit"><i class="fas fa-search"></i><span>検索</span></button>
     </form>

@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -153,7 +153,8 @@ except ImportError:
 
 if not DEBUG:
     SECRET_KEY = os.environ['SECRET_KEY']
-    PASSWORD=os.environ['PASSWORD']
+    REDIS_URL=os.environ['REDIS_URL']
+    WS_URL='wss://book-sns-0209.herokuapp.com/ws/'
     APPLICARIONID=os.environ['APPLICATIONID']
     Default_image='media/kuma_default'
     import django_heroku
@@ -173,7 +174,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer", 
         "CONFIG": {
-            "hosts": [os.environ['REDIS_URL']]
+            "hosts": [REDIS_URL]
         }
     }
 }

@@ -337,7 +337,8 @@ def chat_room(request, room_id,user_id):
     context = {
         'messages':messages,
         'room': room,
-        'Partner':Partner
+        'Partner':Partner,
+        'WS_URL':settings.WS_URL,
     }
     return HttpResponse(template.render(context, request))
 
