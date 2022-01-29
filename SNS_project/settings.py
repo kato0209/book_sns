@@ -173,7 +173,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer", 
         "CONFIG": {
-            "hosts": ['redis://:'+PASSWORD+'@book-sns-0209.herokuapp.com:6379']
+            "hosts": [os.environ['REDIS_TLS_URL']]
         }
     }
 }
