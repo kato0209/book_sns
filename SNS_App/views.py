@@ -325,8 +325,10 @@ class Chat(LoginRequiredMixin,generic.ListView):
                 partner_list.append(partner)
             
         partner_dict=dict(zip(partner_list,message_list))
+        print(222)
         context['room_list']=room_list
         context['partner_dict']=partner_dict
+        print(100)
         return context
 
 
