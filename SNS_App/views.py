@@ -320,7 +320,7 @@ class Chat(LoginRequiredMixin,generic.ListView):
             partner=room.room_member.all().exclude(id=user.id)[0]
             if room.message_set.order_by('-created_at'):
                 print(111)
-                print(room.message_set.order_by)
+                print(room.message_set.order_by('-created_at'))
                 message=room.message_set.order_by('-created_at')[0]
                 message_list.append(message)
                 partner_list.append(partner)
