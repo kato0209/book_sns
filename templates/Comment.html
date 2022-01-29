@@ -34,11 +34,11 @@
       <div class="d-flex">
         <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
             {% if liked %}
-                <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="fas fa-lg fa-heart like-after"></i></button>
+                <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="fas fa-lg fa-heart like-after"></i></button>
             {% else %}
-                <button id="like" name="{{tweet.id}}" data-like-type="MainLike"><i class="far fa-lg fa-heart like-before"></i></button>      
+                <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="far fa-lg fa-heart like-before"></i></button>      
             {% endif %}
-            <p name="{{tweet.id}}-count" class="count"> {{ tweet.like_set.count }} </p>
+            <p name="tweet-count-{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
         </form>
         <div class="stars ms-auto" name="{{ tweet.rating }}">
           <span class="star" name="1">★</span>
@@ -65,11 +65,11 @@
       <div class="d-flex">
         <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
             {% if comment.id in liked_list %}
-                <button id="like" name="{{comment.id}}" data-like-type="SubLike"><i class="fas fa-lg fa-heart like-after"></i></button>
+                <button id="like" name="comment-{{comment.id}}" data-like-type="comment"><i class="fas fa-lg fa-heart like-after"></i></button>
             {% else %}
-                <button id="like" name="{{comment.id}}" data-like-type="SubLike"><i class="far fa-lg fa-heart like-before"></i></button>      
+                <button id="like" name="comment-{{comment.id}}" data-like-type="comment"><i class="far fa-lg fa-heart like-before"></i></button>      
             {% endif %}
-            <p name="{{comment.id}}-count" class="count"> {{ comment.like_set.count }} </p>
+            <p name="comment-count-{{comment.id}}" class="count"> {{ comment.like_set.count }} </p>
         </form>
       </div>
     </div>
@@ -127,20 +127,20 @@
               type: 'POST',
               url: "{% url 'like' %}",
               data: {
-                  'id': $(this).attr('name'),
-                  'like-type':$(this).data('like-type'),
+                  'likeInfo': $(this).attr('name'),
+                  'like_type':$(this).data('like-type'),
                   'csrfmiddlewaretoken': '{{ csrf_token }}'},
               dataType: 'json'
           })
           .done(function(response){
-              selector = document.getElementsByName(response.id);
+              selector = document.getElementsByName(response.like_type+"-"+response.id);
                       if(response.liked){
                           $(selector).html("<i class='fas fa-lg fa-heart like-after'></i>");
                       }
                       else {
                           $(selector).html("<i class='far fa-lg fa-heart like-before'></i>");
                       }
-                      selector2 = document.getElementsByName(response.id + "-count");
+                      selector2 = document.getElementsByName(response.like_type+"-count-"+response.id);
                       $(selector2).text(response.count);
           })
           .fail(function (jqXHR, textStatus, errorThrown) {

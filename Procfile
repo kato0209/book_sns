@@ -1,1 +1,1 @@
-web: gunicorn SNS_project.wsgi --log-file -
+web: daphne SNS_project.asgi:application --port $PORT --bind 0.0.0.0 -v2 

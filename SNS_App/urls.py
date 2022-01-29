@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from .views import *
 urlpatterns = [
-    path('signup/',signupView.as_view(),name='signup'),
+    path('',signupView.as_view(),name='signup'),
     path('login/',loginFunc,name='login'),
     path('logout/',logoutFunc,name='logout'),
     path('home/',HomeView.as_view(),name='home'),

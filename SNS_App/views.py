@@ -171,10 +171,14 @@ def LikeFunc(request):
         tweet=None
         comment=None
         
-        if request.POST.get('like-type')=='MainLike':
-            tweet = get_object_or_404(TweetModel, pk=request.POST.get('id'))
-        elif request.POST.get('like-type')=='SubLike':
-            comment = get_object_or_404(Comment, pk=request.POST.get('id'))
+        like_type=request.POST.get('like_type')
+        likeInfo=request.POST.get('likeInfo')
+        index=likeInfo.find('-')
+        id=likeInfo[index+1:]
+        if like_type =='tweet':
+            tweet = get_object_or_404(TweetModel, pk=id)
+        elif like_type =='comment':
+            comment = get_object_or_404(Comment, pk=id)
         user=request.user
         liked = False
         like = Like.objects.filter(tweet=tweet, user=user,comment=comment)
@@ -185,15 +189,14 @@ def LikeFunc(request):
             liked = True
 
         if tweet:
-            id=tweet.id
             count=tweet.like_set.count()
         elif comment:
-            id=comment.id
             count=comment.like_set.count()
 
         context={
             'id': id,
             'liked': liked,
+            'like_type':like_type,
             'count': count,
             }
     if request.is_ajax():
@@ -315,10 +318,11 @@ class Chat(LoginRequiredMixin,generic.ListView):
 
         for room in room_list:
             partner=room.room_member.all().exclude(id=user.id)[0]
-            message=room.message_set.order_by('-created_at')[0]
-            partner_list.append(partner)
-            message_list.append(message)
-        
+            if room.message_set:
+                message=room.message_set.order_by('-created_at')[0]
+                message_list.append(message)
+                partner_list.append(partner)
+            
         partner_dict=dict(zip(partner_list,message_list))
         context['room_list']=room_list
         context['partner_dict']=partner_dict
@@ -333,7 +337,8 @@ def chat_room(request, room_id,user_id):
     context = {
         'messages':messages,
         'room': room,
-        'Partner':Partner
+        'Partner':Partner,
+        'WS_URL':settings.WS_URL,
     }
     return HttpResponse(template.render(context, request))
 
