@@ -43,9 +43,9 @@
     </div>
     <nav aria-label="Page navigation example">
         <ul class="pagination">
-          {% if page > 1 %}
+          {% if page != 1 %}
           <li class="page-item">
-            <button class="page-link" id="page-link-left" aria-label="Previous" name="{{ page }}">
+            <button class="page-link" id="page-link-left" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </button>
           </li>
@@ -59,9 +59,9 @@
             {% endif %}
           {% endfor %}
 
-          {% if page < 10 %}
+          {% if page != 10 %}
           <li class="page-item">
-            <button class="page-link" id="page-link-right" aria-label="Next" name="{{ page }}">
+            <button class="page-link" id="page-link-right" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </button>
           </li>
@@ -85,19 +85,19 @@ for(const pagingButton of pagingButtons){
 });
 }
 
-if(document.getElementById("page-link-left")!=null){
+if(Input_page!=1){
   var backButton=document.getElementById("page-link-left");
   backButton.addEventListener("click",function (event){
-    Input_page.value=Number(this.name)-1;
+    Input_page.value=Number(Input_page.value)-1;
     let form = document.getElementById("Search-form");
     form.submit();
 });
 }
 
-if(document.getElementById("page-link-right")!=null){
+if(Input_page!=10){
   var nextButton=document.getElementById("page-link-right");
   nextButton.addEventListener("click",function (event){
-    Input_page.value=Number(this.name)+1;
+    Input_page.value=Number(Input_page.value)+1;
     let form = document.getElementById("Search-form");
     form.submit();
   });
