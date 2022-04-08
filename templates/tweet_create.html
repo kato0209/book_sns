@@ -19,9 +19,7 @@
      <div class="d-flex ms-auto mb-3">
       <img src="{{ user.ProfileImage.url }}" width="50px" height="50px" style="border-radius: 100%;">
      </div>
-     {% if title %}
-     <h4>{{title}}</h4>
-     {% endif %}
+     <h4>{{ book_title }}</h4>
      <div class="mb-3">{{ form.content }}</div>
      <div class="mb-3 mt-3"><img id="file-preview" class="bg-light"></div>
       <div class="hooter-container d-flex">

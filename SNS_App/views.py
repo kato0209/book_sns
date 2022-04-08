@@ -81,13 +81,13 @@ def TweetCreate(request,ISBNcode):
             tweet.save()
             return redirect('home')
         else:
-            title=book.title
-            return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'title':title})
+            book_title=book.title
+            return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'book_title':book_title})
     else:
         form=TweetCreationForm()
         book=BookData.objects.get(ISBNcode=ISBNcode)
-        title=book.title
-        return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'title':title})
+        book_title=book.title
+        return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'book_title':book_title})
 
 @login_required
 def SelectItem(request):
@@ -324,7 +324,6 @@ class Chat(LoginRequiredMixin,generic.ListView):
                 partner_list.append(partner)
             
         partner_dict=dict(zip(partner_list,message_list))
-        context['room_list']=room_list
         context['partner_dict']=partner_dict
         return context 
 
@@ -333,14 +332,13 @@ def chat_room(request, room_id,user_id):
     room = Room.objects.get(id=room_id)
     Partner=CustomUser.objects.get(pk=user_id)
     messages = Message.objects.filter(room=room).order_by('created_at')
-    template = loader.get_template('chat_room.html')
     context = {
         'messages':messages,
         'room': room,
         'Partner':Partner,
         'WS_URL':settings.WS_URL,
     }
-    return HttpResponse(template.render(context, request))
+    return render(request,'chat_room.html',context)
 
 @login_required
 def room(request,pk):
@@ -355,7 +353,7 @@ def room(request,pk):
     else:
         room=roomQuery[0]
 
-    return HttpResponseRedirect(reverse('chat_room', args=[room.id,User2.id]))
+    return redirect(reverse('chat_room', args=[room.id,User2.id]))
 
 #RakutenAPI
 SEARCH_URL='https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&applicationId='+settings.APPLICARIONID
