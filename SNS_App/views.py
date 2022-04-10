@@ -327,24 +327,28 @@ class Chat(LoginRequiredMixin,generic.ListView):
         context['partner_dict']=partner_dict
         return context 
 
-
-def chat_room(request, room_id,user_id):
+@login_required
+def chat_room(request, room_id):
     room = Room.objects.get(id=room_id)
-    Partner=CustomUser.objects.get(pk=user_id)
-    messages = Message.objects.filter(room=room).order_by('created_at')
-    context = {
-        'messages':messages,
-        'room': room,
-        'Partner':Partner,
-        'WS_URL':settings.WS_URL,
-    }
-    return render(request,'chat_room.html',context)
+    if request.user in room.room_member.all():
+        Partner=room.room_member.all().exclude(id=request.user.id)[0]
+        messages = Message.objects.filter(room=room).order_by('created_at')
+        context = {
+            'messages':messages,
+            'room': room,
+            'Partner':Partner,
+            'WS_URL':settings.WS_URL,
+        }
+        return render(request,'chat_room.html',context)
+
+    return redirect(reverse('Chat', args=[request.user.id]))
+
+    
 
 @login_required
 def room(request,pk):
     User1=request.user
     User2=CustomUser.objects.get(pk=pk)
-    member_list=[User1,User2]
     roomQuery=Room.objects.filter(room_member=User1).filter(room_member=User2)
     if not roomQuery.exists():
         room = Room.objects.create()
@@ -353,7 +357,7 @@ def room(request,pk):
     else:
         room=roomQuery[0]
 
-    return redirect(reverse('chat_room', args=[room.id,User2.id]))
+    return redirect(reverse('chat_room', args=[room.id]))
 
 #RakutenAPI
 SEARCH_URL='https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&applicationId='+settings.APPLICARIONID
