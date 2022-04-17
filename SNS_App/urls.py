@@ -6,6 +6,7 @@ urlpatterns = [
     path('login/',loginFunc,name='login'),
     path('logout/',logoutFunc,name='logout'),
     path('home/',HomeView.as_view(),name='home'),
+    path('home2/',Home2View.as_view(),name='home2'),
     path('tweetCreate/<str:ISBNcode>',TweetCreate,name='tweetCreate'),
     path('SelectItem/',SelectItem,name='SelectItem'),
     path('SelectedItem/<str:ISBNcode>',SelectedItem,name='SelectedItem'), 

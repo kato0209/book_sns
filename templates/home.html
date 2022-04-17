@@ -17,8 +17,7 @@
     <a class="navbar-brand navbarTextColor"><i class="far fa-smile-beam smileIcon"></i>BOOK_SNS</a>
 
     <ul class="nav nav-pills">
-      <li class="nav-item"><a href="{% url 'home' %}" class="nav-link">ホーム</a></li>
-      <li class="nav-item"><a href="{% url 'SearchItem' 'Search' %}" class="nav-link"><i class="fas fa-search"></i>探す</a></li>
+      <li class="nav-item"><a href="{% url 'SearchItem' 'Search' %}" class="nav-link"><i class="fas fa-search"></i>本を探す</a></li>
       <li class="nav-item"><a href="{% url 'Chat' user.id %}" class="nav-link">チャット</a></li>
       <li class="nav-item"><a href="{% url 'userPage' user.id %}" class="nav-link">マイページ</a></li>
     </ul>
@@ -28,6 +27,19 @@
       <button class="btn btn-success" type="submit"><i class="fas fa-search"></i><span>検索</span></button>
     </form>
   </div>
+
+  <div class="container">
+    <ul class="nav nav-pills mx-auto page-select">
+      {% if selected_page == 'home' %}
+      <li class="nav-item selected-page"><a href="{% url 'home' %}" class="nav-link">新着の投稿</a></li>
+      <li class="nav-item"><a href="{% url 'home2' %}" class="nav-link">フォローした人の投稿</a></li>
+      {% else %}
+      <li class="nav-item"><a href="{% url 'home' %}" class="nav-link">新着の投稿</a></li>
+      <li class="nav-item selected-page"><a href="{% url 'home2' %}" class="nav-link">フォローした人の投稿</a></li>
+      {% endif %}
+    </ul>
+  </div>
+
 </nav>
 {% endblock header %}
 

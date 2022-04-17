@@ -54,10 +54,11 @@ class HomeView(LoginRequiredMixin,generic.ListView):
         if keyword:
             queryset=queryset.filter(content__icontains=keyword)
         
-        return queryset
+        return queryset[:1000]
 
     def get_context_data(self,**kwargs):
         context=super().get_context_data(**kwargs)
+        selected_page='home'
         liked_list = []
 
         for tweet in context['tweetmodel_list']:
@@ -66,8 +67,41 @@ class HomeView(LoginRequiredMixin,generic.ListView):
                 liked_list.append(tweet.id)
         
         context['liked_list']=liked_list
+        context['selected_page']=selected_page
         return context
 
+class Home2View(LoginRequiredMixin,generic.ListView):
+    model=TweetModel
+    template_name='home.html'
+    context_object_name = 'tweetmodel_list'
+
+    def get_queryset(self,**kwargs):
+        queryset = super().get_queryset(**kwargs)
+        queryset=queryset.exclude(user=self.request.user)
+        Connections=self.request.user.following.all()
+        following_list=[]
+        for connection in Connections:
+            following_list.append(connection.follower)
+        queryset=queryset.filter(user__in=following_list).order_by('created_at')
+        keyword=self.request.GET.get('keyword')
+        if keyword:
+            queryset=queryset.filter(content__icontains=keyword)
+        
+        return queryset[:1000]
+
+    def get_context_data(self,**kwargs):
+        context=super().get_context_data(**kwargs)
+        selected_page='home2'
+        liked_list = []
+
+        for tweet in context['tweetmodel_list']:
+            liked = tweet.like_set.filter(user=self.request.user)
+            if liked.exists():
+                liked_list.append(tweet.id)
+        
+        context['liked_list']=liked_list
+        context['selected_page']=selected_page
+        return context
 
 @login_required
 def TweetCreate(request,ISBNcode):
