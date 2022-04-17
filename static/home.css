@@ -8,8 +8,10 @@
     .Search-user{
         margin-top: 8px;
     }
+    .page-select{
+        margin-left:5px !important;
+    }
 }
-
 .navbarTextColor{
     color: #28a745;
 }
@@ -30,6 +32,9 @@
 .nav-item{
     border-left:1px solid #333;
     border-right:1px solid #333;
+}
+.selected-page a{
+    text-decoration: underline;
 }
 body{
     background-color: #222;
