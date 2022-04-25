@@ -293,42 +293,38 @@ def FollowFunc(request):
     if request.is_ajax():
         return JsonResponse(context)
 
-class CreateComment(LoginRequiredMixin,generic.CreateView):
-    model=Comment
-    form_class=CreateCommentForm
-    template_name='Comment.html'
-
-    def get_success_url(self):
-        url=self.request.META['HTTP_REFERER']
-        return url
-    
-    def get_context_data(self,**kwargs):
-        context = super().get_context_data(**kwargs)
-        context['tweet']=TweetModel.objects.get(id=self.kwargs['tweet_pk'])
-        comment_list=context['tweet'].comment_set.all()
-        context['comment_list']=comment_list
+@login_required
+def create_comment(request, tweet_pk):
+    if request.method=="GET":
+        form=CreateCommentForm()
+        tweet=TweetModel.objects.filter(id=tweet_pk)
+        if not tweet.exists():
+            return redirect('home')
+        tweet=tweet[0]
+        comment_list=tweet.comment_set.all()
         liked_list = []
-
-        for comment in context['comment_list']:
-            liked = comment.like_set.filter(user=self.request.user)
+        for comment in comment_list:
+            liked = comment.like_set.filter(user=request.user)
             if liked.exists():
                 liked_list.append(comment.id)
-
-        context['liked_list']=liked_list
-
         liked=False
-        if context['tweet'].like_set.filter(user=self.request.user):
+        if tweet.like_set.filter(user=request.user):
             liked=True
-        context['liked']=liked
-        
-        return context
-
-    def form_valid(self, form):
+        context={
+            'tweet':tweet,
+            'comment_list':comment_list,
+            'liked_list':liked_list,
+            'liked':liked,
+            'form':form
+        }
+        return render(request,'Comment.html',context)
+    else:
+        form=CreateCommentForm(request.POST)
         comment=form.save(commit=False)
-        comment.user = self.request.user
-        comment.tweet=TweetModel.objects.get(id=self.kwargs['tweet_pk'])
+        comment.user = request.user
+        comment.tweet=TweetModel.objects.get(id=tweet_pk)
         comment.save()
-        return super().form_valid(form)
+        return redirect(request.META['HTTP_REFERER'])
 
 class Chat(LoginRequiredMixin,generic.ListView):
     model=Room

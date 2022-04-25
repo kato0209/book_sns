@@ -63,72 +63,52 @@
 <!------------------------------------->
 
 <!-- 投稿の一覧 -->
-{% for tweet in tweetmodel_list reversed %}
-<div class="tweet-container container border border-secondary">
-    <p class="font-bold d-flex">
-      <a href="{% url 'userPage' tweet.user.id %}" class="me-3" role="button" aria-pressed="true">
-      <img src="{{ tweet.user.ProfileImage.url }}" class="user-icon">
-      </a>
-      {{ tweet.user.username }} 
-      {% if user == tweet.user %}
-      <button type="button" class="btn btn-danger del_confirm" data-bs-toggle="modal" data-bs-target="#DeleteModal"  data-deleteurl="{% url 'TweetDelete' tweet.id %}">削除</button>
-      {% endif %}
-    </p>
-   <p class="tweet-text">{{ tweet.content | linebreaksbr }}</p>
-   <div class="d-flex book-container border border-secondary">
-      <img src="{{ tweet.book.imageUrl }}" alt="" class="book-img me-3">
-      <div>
-       <h6><a href="{{ tweet.book.itemUrl }}" class="book-title">{{ tweet.book.title}}</a></h6>
-       <p class="text-primary">{{ tweet.book.author }}</p>
+<div id="tweet-list">
+  {% for tweet in tweetmodel_list reversed %}
+  <div class="tweet-container container border border-secondary" id="test">
+      <p class="font-bold d-flex">
+        <a href="{% url 'userPage' tweet.user.id %}" class="me-3" role="button" aria-pressed="true">
+        <img src="{{ tweet.user.ProfileImage.url }}" class="user-icon">
+        </a>
+        {{ tweet.user.username }} 
+      </p>
+     <p class="tweet-text">{{ tweet.content | linebreaksbr }}</p>
+     <div class="d-flex book-container border border-secondary">
+        <img src="{{ tweet.book.imageUrl }}" alt="" class="book-img me-3">
+        <div>
+         <h6><a href="{{ tweet.book.itemUrl }}" class="book-title">{{ tweet.book.title}}</a></h6>
+         <p class="text-primary">{{ tweet.book.author }}</p>
+        </div>
+     </div>
+    <div class="d-flex"> 
+      <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
+        {% if tweet.id in liked_list %}
+            <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="fas fa-lg fa-heart like-after"></i></button>
+        {% else %}
+            <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="far fa-lg fa-heart like-before"></i></button>      
+        {% endif %}
+        <p name="tweet-count-{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
+      </form>
+      <div class="stars ms-auto" name="{{ tweet.rating }}">
+        <span class="star" name="1">★</span>
+        <span class="star" name="2">★</span>
+        <span class="star" name="3">★</span>
+        <span class="star" name="4">★</span>
+        <span class="star" name="5">★</span>
       </div>
-   </div>
-  <div class="d-flex"> 
-    <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
-      {% if tweet.id in liked_list %}
-          <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="fas fa-lg fa-heart like-after"></i></button>
-      {% else %}
-          <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="far fa-lg fa-heart like-before"></i></button>      
-      {% endif %}
-      <p name="tweet-count-{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
-    </form>
-    <div class="stars ms-auto" name="{{ tweet.rating }}">
-      <span class="star" name="1">★</span>
-      <span class="star" name="2">★</span>
-      <span class="star" name="3">★</span>
-      <span class="star" name="4">★</span>
-      <span class="star" name="5">★</span>
     </div>
+    <hr>
+     <div class="comment">
+      <a href="{% url 'CreateComment' tweet.id %}" class="me-3" role="button" aria-pressed="true">
+       コメント>
+      </a>
+     </div>
   </div>
-  <hr>
-   <div class="comment">
-    <a href="{% url 'CreateComment' tweet.id %}" class="me-3" role="button" aria-pressed="true">
-     コメント>
-    </a>
-   </div>
+  {% endfor %}
 </div>
-{% endfor %}
 <!------------------------------>
 
 <button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
-
-<!-- DeleteModal -->
-<div class="modal fade" id="DeleteModal" tabindex="-1" aria-labelledby="DeleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="DeleteModalLabel">確認</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        本当に削除してよろしいですか?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
-        <a href="#" class="btn btn-danger" id="del_url">OK</a>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock content %}
 
 {% block footer %}

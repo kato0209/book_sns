@@ -13,14 +13,14 @@
 
 
 {% block content %}
-<main>
+<main id="tweet-list">
   <!-- 本文 -->
     <div class="tweet-container container myborder border-secondary">
         <p class="font-bold d-flex">
           <img src="{{ tweet.user.ProfileImage.url }}" class="user-icon me-3">
           {{ tweet.user.username }} 
           {% if user == tweet.user %}
-          <button type="button" class="btn btn-danger del_confirm" data-bs-toggle="modal" data-bs-target="#DeleteModal"  data-deleteurl="{% url 'TweetDelete' tweet.id %}">削除</button>
+          <button type="button" v-on:click="DeleteButton" class="btn btn-danger del_confirm" data-bs-toggle="modal" data-bs-target="#DeleteModal"  data-deleteurl="{% url 'TweetDelete' tweet.id %}">削除</button>
           {% endif %}
         </p>
         <p class="tweet-text">{{ tweet.content | linebreaksbr }}</p>
@@ -57,7 +57,7 @@
           <img src="{{ comment.user.ProfileImage.url }}" class="user-icon me-3">
           {{ comment.user.username }} 
           {% if user == comment.user %}
-          <button type="button" class="btn btn-danger del_confirm" data-bs-toggle="modal" data-bs-target="#DeleteModal"  data-deleteurl="{% url 'CommentDelete' comment.id %}">削除</button>
+          <button type="button" v-on:click="DeleteButton" class="btn btn-danger del_confirm" data-bs-toggle="modal" data-bs-target="#DeleteModal"  data-deleteurl="{% url 'CommentDelete' comment.id %}">削除</button>
           {% endif %}
         </p>
        <p class="tweet-text">{{ comment.text | linebreaksbr }}</p>
@@ -77,8 +77,26 @@
     <!-------------------------------->
 
     <button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
-</main>
 
+    <!-- DeleteModal -->
+    <div class="modal fade" id="DeleteModal" tabindex="-1" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="DeleteModalLabel">確認</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            本当に削除してよろしいですか?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+            <a v-bind:href="[[ delete_url ]]" class="btn btn-danger" id="del_url">OK</a>
+          </div>
+        </div>
+      </div>
+    </div>
+</main>
 
 <!-- 下部のbar -->
 <footer class="footer mt-auto py-3 fixed-bottom">
@@ -92,26 +110,7 @@
  </div>
 </footer>
 
-<!-- DeleteModal -->
-<div class="modal fade" id="DeleteModal" tabindex="-1" aria-labelledby="DeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="DeleteModalLabel">確認</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          本当に削除してよろしいですか?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
-          <a href="#" class="btn btn-danger" id="del_url">OK</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {% endblock content %}
+{% endblock content %}
 
 {% block footer %}
 <script src="{% static 'up_button.js' %}"></script>
