@@ -1,11 +1,16 @@
-const deleteModalButtons = document.getElementsByClassName('del_confirm');
-const deleteButton = document.getElementById('del_url');
+const TweetListApp=Vue.createApp({
+    data:()=>({
+        delete_url:'#'
+    }),
+    methods:{
+        DeleteButton:function(event){
+            this.delete_url=event.target.dataset.deleteurl
+        }
+    }
+})
+TweetListApp.config.compilerOptions.delimiters = ['[[', ']]']
+TweetListApp.mount('#tweet-list')
 
-for (const button of deleteModalButtons) {
-    button.addEventListener('click', function() {
-    deleteButton.setAttribute("href",button.dataset.deleteurl)
-   });
-}
 
 const STARS=document.getElementsByClassName('star');
 for(const star of STARS){
