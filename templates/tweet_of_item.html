@@ -35,14 +35,14 @@
         </div>
      </div>
     <div class="d-flex"> 
-      <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
+      <div class="d-flex">
         {% if tweet.id in liked_list %}
-            <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="fas fa-lg fa-heart like-after"></i></button>
+            <button class="like" v-on:click="tweet_like_post" id="tweet_{{tweet.id}}" data-like-id="{{tweet.id}}"><i class="fas fa-lg fa-heart like-after"></i></button>
         {% else %}
-            <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="far fa-lg fa-heart like-before"></i></button>      
+            <button class="like" v-on:click="tweet_like_post" id="tweet_{{tweet.id}}" data-like-id="{{tweet.id}}"><i class="far fa-lg fa-heart like-before"></i></button>      
         {% endif %}
-        <p name="tweet-count-{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
-      </form>
+        <p id="tweet_count_{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
+      </div>
       <div class="stars ms-auto" name="{{ tweet.rating }}">
         <span class="star" name="1">★</span>
         <span class="star" name="2">★</span>
@@ -77,8 +77,9 @@
       </div>
     </div>
   </div>
-  <button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
+
 </div>
+<button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
 {% endif %}
 {% endblock content %}
 
@@ -88,38 +89,43 @@
 
 <!--いいね機能のAjax処理-->
 <script type="text/javascript">
-  $(document).ready(function(event){
-    $(document).on('click', '#like', function(event){
-      event.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'like' %}",
-            data: {
-                'likeInfo': $(this).attr('name'),
-                'like_type':$(this).data('like-type'),
-                'csrfmiddlewaretoken': '{{ csrf_token }}'},
-            dataType: 'json'
-        })
-        .done(function(response){
-            selector = document.getElementsByName(response.like_type+"-"+response.id);
-                    if(response.liked){
-                        $(selector).html("<i class='fas fa-lg fa-heart like-after'></i>");
-                    }
-                    else {
-                        $(selector).html("<i class='far fa-lg fa-heart like-before'></i>");
-                    }
-                    selector2 = document.getElementsByName(response.like_type+"-count-"+response.id);
-                    $(selector2).text(response.count);
-        })
-        .fail(function (jqXHR, textStatus, errorThrown) {
-            console.log("ajax通信に失敗しました");
-            console.log("jqXHR          : " + jqXHR.status); 
-            console.log("textStatus     : " + textStatus);    
-            console.log("errorThrown    : " + errorThrown.message); 
-            console.log("URL            : " + url);
-    });
-             
-    });
-  });
-  </script>
+const TweetListApp=Vue.createApp({
+    data:()=>({
+        delete_url:'#',
+        like_url:"{% url 'tweet_like' %}"
+    }),
+    methods:{
+        DeleteButton:function(event){
+            this.delete_url=event.target.dataset.deleteurl
+        },
+        tweet_like_post:function(event){
+          const headers={
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type':'application / json',
+              'X-CSRFToken':'{{ csrf_token }}'
+          }
+          let like_data={
+            "like_id":event.currentTarget.dataset.likeId,
+          }
+          like_data=JSON.stringify(like_data)
+          axios.post(this.like_url,like_data,{headers:headers})
+          .then(function(res){
+            const target_button=document.getElementById('tweet_'+res.data.like_id);
+            if(res.data.liked){
+              target_button.innerHTML="<i class='fas fa-lg fa-heart like-after'></i>"
+            }else{
+              target_button.innerHTML="<i class='far fa-lg fa-heart like-before'></i>"
+            }
+            target_counter = document.getElementById("tweet_count_"+res.data.like_id);
+            target_counter.innerText=res.data.count
+          })
+          .catch(function(error){
+            console.log(error)
+          })
+        }
+    }
+})
+TweetListApp.config.compilerOptions.delimiters = ['[[', ']]']
+TweetListApp.mount('#tweet-list') 
+</script>
 {% endblock footer %}

@@ -12,24 +12,30 @@
 
 
 {% block content %}
-<div class="container mt-5">
+<div id="user_profile" class="container mt-5">
   <!-- ユーザープロフィール -->
   <div class="font-bold profile-container d-flex align-items-center">
-      <img src="{{ tweetUser.ProfileImage.url }}" class="user-icon me-3">{{tweetUser.username}}
-      {% if user == tweetUser %}
+      <img src="{{ selected_user.ProfileImage.url }}" class="user-icon me-3">
+      <div class="me-5">{{selected_user.username}}</div>
+      <div class="w-100"></div>
+      <div class="fs-5 follow-text">
+        <a id="following_count" href="{% url 'user_list_of_follow' selected_user.id 'following' %}" class="me-3">{{ selected_user_following_count }} フォロー</a>
+        <a id="follower_count" href="{% url 'user_list_of_follow' selected_user.id 'follower' %}">{{ selected_user_follower_count }} フォロワー</a>
+      </div>
+      {% if user == selected_user %}
       <a href="{% url 'profile_edit' user.id %}" class="btn btn-success logout-button ms-auto" role="button" aria-pressed="true">プロフィールを変更</a>
       {% else %}
       <div class="ms-auto d-flex">
-        <a href="{% url 'room' tweetUser.id %}" class="MessageButton me-3" role="button" aria-pressed="true">
+        <a href="{% url 'room' selected_user.id %}" class="MessageButton me-3" role="button" aria-pressed="true">
           <i class="far fa-envelope"></i>
         </a>
-      <form action="{% url 'follow' %}" method="POST">{% csrf_token %}
+      <div>
         {% if followed %}
-            <button id="follow" name="{{tweetUser.id}}" class="btn btn-light clear-decoration">フォロー解除</button>
+            <button id="follow_{{selected_user.id}}" v-on:click="follow_post" name="{{selected_user.id}}" class="follow btn btn-light clear-decoration">フォロー解除</button>
         {% else %}
-            <button id="follow" name="{{tweetUser.id}}" class="btn btn-success clear-decoration">フォロー</button>      
+            <button id="follow_{{selected_user.id}}" v-on:click="follow_post" name="{{selected_user.id}}" class="follow btn btn-success clear-decoration">フォロー</button>      
         {% endif %}
-      </form>
+      </div>
       </div>
       {% endif %}
   </div>
@@ -42,7 +48,7 @@
        <p class="font-bold d-flex">
        <img src="{{ tweet.user.ProfileImage.url }}" class="user-icon me-3">
        {{ tweet.user.username }} 
-       {% if user == tweetUser %}
+       {% if user == selected_user %}
        <button type="button" id="delete-button" v-on:click="DeleteButton" class="btn btn-danger del_confirm" data-bs-toggle="modal" data-bs-target="#DeleteModal" data-deleteurl="{% url 'TweetDelete' tweet.id %}">削除</button>
        {% endif %}
        </p>
@@ -55,14 +61,14 @@
          </div>
        </div>
      <div class="d-flex">
-      <form action="{% url 'like' %}" method="POST" class="d-flex">{% csrf_token %}
+      <div class="d-flex">
         {% if tweet.id in liked_list %}
-            <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="fas fa-lg fa-heart like-after"></i></button>
+            <button class="like" id="tweet-{{tweet.id}}" v-on:click="tweet_like_post" data-like-id="{{tweet.id}}"><i class="fas fa-lg fa-heart like-after"></i></button>
         {% else %}
-            <button id="like" name="tweet-{{tweet.id}}" data-like-type="tweet"><i class="far fa-lg fa-heart like-before"></i></button>      
+            <button class="like" id="tweet-{{tweet.id}}" v-on:click="tweet_like_post" data-like-id="{{tweet.id}}"><i class="far fa-lg fa-heart like-before"></i></button>      
         {% endif %}
-            <p name="tweet-count-{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
-      </form>
+            <p id="tweet-count-{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
+      </div>
       <div class="stars ms-auto" name="{{ tweet.rating }}">
        <span class="star" name="1">★</span>
        <span class="star" name="2">★</span>
@@ -108,76 +114,85 @@
 <script src="{% static 'tweet.js' %}"></script>
 
 <script type="text/javascript">
-  //いいね機能のajax処理
-  $(document).ready(function(event){
-    $(document).on('click', '#like', function(event){
-      event.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'like' %}",
-            data: {
-                'likeInfo': $(this).attr('name'),
-                'like_type':$(this).data('like-type'),
-                'csrfmiddlewaretoken': '{{ csrf_token }}'},
-            dataType: 'json'
-        })
-        .done(function(response){
-            selector = document.getElementsByName(response.like_type+"-"+response.id);
-                    if(response.liked){
-                        $(selector).html("<i class='fas fa-lg fa-heart like-after'></i>");
-                    }
-                    else {
-                        $(selector).html("<i class='far fa-lg fa-heart like-before'></i>");
-                    }
-                    selector2 = document.getElementsByName(response.like_type+"-count-"+response.id);
-                    $(selector2).text(response.count);
-        })
-        .fail(function (jqXHR, textStatus, errorThrown) {
-            console.log("ajax通信に失敗しました");
-            console.log("jqXHR          : " + jqXHR.status); 
-            console.log("textStatus     : " + textStatus);    
-            console.log("errorThrown    : " + errorThrown.message); 
-            console.log("URL            : " + url);
-    });
-             
-    });
-  });
 
-//フォロー機能のajax処理
-$(document).ready(function(event){
-  $(document).on('click', '#follow', function(event){
-    event.preventDefault();
-      $.ajax({
-          type: 'POST',
-          url: "{% url 'follow' %}",
-          data: {
-              'user_id': $(this).attr('name'),
-              'csrfmiddlewaretoken': '{{ csrf_token }}'},
-          dataType: 'json'
-      })
-      .done(function(response){
-          selector = document.getElementsByName(response.user_id);
-                  if(response.followed){
-                      $(selector).removeClass("btn-success");
-                      $(selector).addClass("btn-light");
-                      $(selector).text("フォロー解除")
-                  }
-                  else {
-                      $(selector).removeClass("btn-light");
-                      $(selector).addClass("btn-success");
-                      $(selector).text("フォロー")
-                  }
-                  $(this).blur();
-      })
-      .fail(function (jqXHR, textStatus, errorThrown) {
-          console.log("ajax通信に失敗しました");
-          console.log("jqXHR          : " + jqXHR.status); 
-          console.log("textStatus     : " + textStatus);    
-          console.log("errorThrown    : " + errorThrown.message); 
-          console.log("URL            : " + url);
-  });
-           
-  });
-});
+const TweetListApp=Vue.createApp({
+    data:()=>({
+        delete_url:'#',
+        like_url:"{% url 'tweet_like' %}"
+    }),
+    methods:{
+        DeleteButton:function(event){
+            this.delete_url=event.target.dataset.deleteurl
+        },
+        tweet_like_post:function(event){
+          const headers={
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type':'application / json',
+              'X-CSRFToken':'{{ csrf_token }}'
+          }
+          let like_data={
+            "like_id":event.currentTarget.dataset.likeId,
+          }
+          like_data=JSON.stringify(like_data)
+          axios.post(this.like_url,like_data,{headers:headers})
+          .then(function(res){
+            const target_button=document.getElementById('tweet-'+res.data.like_id);
+            if(res.data.liked){
+              target_button.innerHTML="<i class='fas fa-lg fa-heart like-after'></i>"
+            }else{
+              target_button.innerHTML="<i class='far fa-lg fa-heart like-before'></i>"
+            }
+            target_counter = document.getElementById("tweet-count-"+res.data.like_id);
+            target_counter.innerText=res.data.count
+          })
+          .catch(function(error){
+            console.log(error)
+          })
+        }
+    }
+})
+TweetListApp.config.compilerOptions.delimiters = ['[[', ']]']
+TweetListApp.mount('#tweet-list')
+
+const UserProfileApp=Vue.createApp({
+    data:()=>({
+        follow_url:"{% url 'follow' %}"
+    }),
+    methods:{
+        follow_post:function(event){
+          const headers={
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type':'application / json',
+              'X-CSRFToken':'{{ csrf_token }}'
+          }
+          let follow_data={
+            "follow_id":event.currentTarget.name,
+            "from_user_page": true,
+          }
+          follow_data=JSON.stringify(follow_data)
+          axios.post(this.follow_url,follow_data,{headers:headers})
+          .then(function(res){
+            const target_button=document.getElementById('follow_'+res.data.follow_id);
+            if(res.data.followed){
+              target_button.classList.remove("btn-success")
+              target_button.classList.add("btn-light")
+              target_button.innerText="フォロー解除"
+            }else{
+              target_button.classList.remove("btn-light")
+              target_button.classList.add("btn-success")
+              target_button.innerText="フォロー"
+            }
+            target_button.blur()
+            follower_count_ele=document.getElementById('follower_count')
+            follower_count_ele.innerText=res.data.follower_count+' フォロワー'
+          })
+          .catch(function(error){
+            console.log(error)
+          })
+        }
+    }
+})
+UserProfileApp.config.compilerOptions.delimiters = ['[[', ']]']
+UserProfileApp.mount('#user_profile')
 </script>
 {% endblock footer%}

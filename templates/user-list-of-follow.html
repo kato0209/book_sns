@@ -14,30 +14,22 @@
 {% block content %}
   
 <main class="form-search-user">
-  <!-- 検索フォーム -->
-  <div class="container">
-    <form method="GET" class="d-flex">
-          <input type="text" class="form-control Search-form" placeholder="ユーザーを検索" name="keyword_user">
-          <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i><span>検索</span></button>
-    </form>
-  </div>
-  <!------------->
-
+{% if user_list %}    
 <!-- ユーザー一覧 -->
 <div id="user_list">
-{% for searched_user in user_list%}
+{% for user_i in user_list%}
   <div class="user-container container border border-secondary">
     <div class="font-bold d-flex flex-wrap">
-      <a href="{% url 'userPage' searched_user.id %}" class="me-3" role="button" aria-pressed="true">
-        <img src="{{ searched_user.ProfileImage.url }}" class="user-icon">
+      <a href="{% url 'userPage' user_i.id %}" class="me-3" role="button" aria-pressed="true">
+        <img src="{{ user_i.ProfileImage.url }}" class="user-icon">
       </a>
-      {{ searched_user.username }} 
-      {% if searched_user != user %}
+      {{ user_i.username }} 
+      {% if user_i != user %}
       <div class="ms-auto">
-          {% if searched_user.id in followed_list %}
-              <button id="follow_{{searched_user.id}}" v-on:click="follow_post" name="{{searched_user.id}}" class="follow btn btn-light clear-decoration">フォロー解除</button>
+          {% if user_i.id in followed_list %}
+              <button id="follow_{{user_i.id}}" v-on:click="follow_post" name="{{user_i.id}}" class="follow btn btn-light clear-decoration">フォロー解除</button>
           {% else %}
-              <button id="follow_{{searched_user.id}}" v-on:click="follow_post" name="{{searched_user.id}}" class="follow btn btn-success clear-decoration">フォロー</button>      
+              <button id="follow_{{user_i.id}}" v-on:click="follow_post" name="{{user_i.id}}" class="follow btn btn-success clear-decoration">フォロー</button>      
           {% endif %}
       </div>
       {% endif %}
@@ -48,6 +40,13 @@
 <!---------------->
 
   <button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
+{% else %}
+  {% if type_of_follow == 'follower' %}
+  <h1>まだフォロワーはいません</h1>
+  {% else %}
+  <h1>まだフォローしているユーザーはいません</h1>
+  {% endif %}
+{% endif %}
 </main>
 {% endblock content %}
 

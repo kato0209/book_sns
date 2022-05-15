@@ -8,6 +8,9 @@
 
 {% block content %}
 <div class="my-5">
+    {% if From == 'Select' %}
+    <h3 class="mb-4 ms-1">本を選択しよう！</h3>
+    {% endif %}
     <form method="post" action="{% url 'SearchItem' From %}" class="d-flex" id="Search-form">{% csrf_token %}
         <div class="align-items-center w-100">
             {% render_field form.title class="form-control" placeholder="キーワードから探す"%}

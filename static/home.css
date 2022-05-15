@@ -101,11 +101,11 @@ input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focu
 .modal-content{
    background-color: #000b00;
 }
-#like{
+.like{
     background: transparent;
     border: none;
 }
-#like:focus{
+.like:focus{
     outline: none;
 }
 .like-after{
