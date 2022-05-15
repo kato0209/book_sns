@@ -124,10 +124,6 @@ def TweetCreate(request,ISBNcode):
         return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'book_title':book_title})
 
 @login_required
-def SelectItem(request):
-    return render(request,'book_select.html')
-
-@login_required
 def SelectedItem(request,ISBNcode):
     Item=get_api_data(params={'isbn':ISBNcode})
     item=Item[0]['Item']
@@ -198,39 +194,74 @@ class SearchUserView(LoginRequiredMixin,generic.ListView):
         
         return context
 
+def return_user_list_of_follow(request, user_id, type_of_follow):
+    selected_user=CustomUser.objects.get(id=user_id)
+    user_list=[]
+    if type_of_follow == 'follower':
+        user_list_connection=selected_user.follower.all()
+        for connection in user_list_connection:
+            user_list.append(connection.following)
+    else:
+        user_list_connection=selected_user.following.all()
+        for connection in user_list_connection:
+            user_list.append(connection.follower)
+    
+    followed_list=[]
+    for user in user_list:
+        follower_list=user.follower.all()
+        followed = follower_list.filter(following=request.user)
+        if followed.exists():
+            followed_list.append(user.id)
+    
+    context={
+        'user_list':user_list,
+        'followed_list':followed_list,
+        'type_of_follow':type_of_follow
+    }
+    return render(request,'user-list-of-follow.html',context)
+            
 
 @login_required
-def LikeFunc(request):
+def tweet_like_func(request):
     if request.method =="POST":
-        tweet=None
-        comment=None
-        
-        like_type=request.POST.get('like_type')
-        likeInfo=request.POST.get('likeInfo')
-        index=likeInfo.find('-')
-        id=likeInfo[index+1:]
-        if like_type =='tweet':
-            tweet = get_object_or_404(TweetModel, pk=id)
-        elif like_type =='comment':
-            comment = get_object_or_404(Comment, pk=id)
+        like_id=json.loads(request.body).get('like_id')
+        tweet = get_object_or_404(TweetModel, pk=like_id)
         user=request.user
         liked = False
-        like = Like.objects.filter(tweet=tweet, user=user,comment=comment)
+        like = Like.objects.filter(tweet=tweet, user=user)
         if like.exists():
             like.delete()
         else:
-            like.create(tweet=tweet, user=user,comment=comment)
+            like.create(tweet=tweet, user=user)
             liked = True
 
-        if tweet:
-            count=tweet.like_set.count()
-        elif comment:
-            count=comment.like_set.count()
-
+        count=tweet.like_set.count()
         context={
-            'id': id,
+            'like_id': like_id,
             'liked': liked,
-            'like_type':like_type,
+            'count': count,
+            }
+    if request.is_ajax():
+        return JsonResponse(context)
+
+@login_required
+def comment_like_func(request):
+    if request.method =="POST":
+        like_id=json.loads(request.body).get('like_id')
+        comment = get_object_or_404(Comment, pk=like_id)
+        user=request.user
+        liked = False
+        like = Like.objects.filter(user=user,comment=comment)
+        if like.exists():
+            like.delete()
+        else:
+            like.create(user=user,comment=comment)
+            liked = True
+
+        count=comment.like_set.count()
+        context={
+            'like_id': like_id,
+            'liked': liked,
             'count': count,
             }
     if request.is_ajax():
@@ -243,18 +274,20 @@ class userPageView(LoginRequiredMixin,generic.ListView):
 
     def get_queryset(self,**kwargs):
         queryset = super().get_queryset(**kwargs)
-        tweetUser = CustomUser.objects.get(id=self.kwargs['pk'])
-        queryset=queryset.filter(user=tweetUser)
+        selected_user = CustomUser.objects.get(id=self.kwargs['pk'])
+        queryset=queryset.filter(user=selected_user)
         return queryset
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
         liked_list = []
         followed=False
-        tweetUser = CustomUser.objects.get(id=self.kwargs['pk'])
+        selected_user = CustomUser.objects.get(id=self.kwargs['pk'])
+        selected_user_following_count=selected_user.following.count()
+        selected_user_follower_count=selected_user.follower.count()
         following_list=self.request.user.following.all() 
         
-        followed=following_list.filter(follower=tweetUser)
+        followed=following_list.filter(follower=selected_user)
         if followed.exists():
             followed=True
 
@@ -263,7 +296,9 @@ class userPageView(LoginRequiredMixin,generic.ListView):
             if liked.exists():
                 liked_list.append(tweet.id)
 
-        context['tweetUser']=tweetUser
+        context['selected_user_following_count']=selected_user_following_count
+        context['selected_user_follower_count']=selected_user_follower_count
+        context['selected_user']=selected_user
         context['liked_list']=liked_list
         context['followed']=followed
         
@@ -271,24 +306,34 @@ class userPageView(LoginRequiredMixin,generic.ListView):
 
 
 @login_required
-def FollowFunc(request):
+def follow_func(request):
     if request.method =="POST":
         following = request.user
-        follower = CustomUser.objects.get(pk=request.POST.get('user_id'))
-        
+        follow_id=json.loads(request.body).get('follow_id')
+        from_user_page=False
+        from_user_page=json.loads(request.body).get('from_user_page')
+        followed_user = CustomUser.objects.get(pk=follow_id)
         followed=False
-        connection = Connection.objects.filter(follower=follower,following=following)
+        connection = Connection.objects.filter(follower=followed_user,following=following)
 
         if connection.exists():
             connection.delete()
         else:
-            connection.create(follower=follower, following=following)
+            connection.create(follower=followed_user, following=following)
             followed = True
-    
-        context={
-            'user_id': follower.id,
+
+        if from_user_page:
+            follower_count=followed_user.follower.count()
+            context={
+            'follow_id': follow_id,
             'followed': followed,
-        }
+            'follower_count': follower_count,
+            }
+        else:
+            context={
+                'follow_id': follow_id,
+                'followed': followed,
+            }
         
     if request.is_ajax():
         return JsonResponse(context)

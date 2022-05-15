@@ -3,9 +3,6 @@
         font-size: 12px;
     }
   }
-.marginTop{
-    margin-top: 10px;
-}
 body{
     background-color: #222;
     color: white;
@@ -29,14 +26,20 @@ body{
     font-size: 2.2rem;
 }
 
-
 .profile-container{
     margin-left: 5%;
     margin-right: 5%;
     margin-bottom: 20px;
     margin-top: 7px;
+    flex-wrap: wrap;
 }
-
+.follow-text a{
+    text-decoration: none;
+    color: white;
+}
+.follow-text a:hover{
+    color: #5c5c5c;
+}
 .del_confirm{
     margin-left: auto;
     padding: .375rem .15rem;
@@ -44,11 +47,11 @@ body{
 .modal-content{
    background-color: #000b00;
 }
-#like{
+.like{
     background: transparent;
     border: none;
 }
-#like:focus{
+.like:focus{
     outline: none;
 }
 .like-after{

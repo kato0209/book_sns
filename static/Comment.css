@@ -51,11 +51,11 @@ textarea{
     white-space: nowrap;
 }
 
-#like{
+.like{
     background: transparent;
     border: none;
 }
-#like:focus{
+.like:focus{
     outline: none;
 }
 .like-after{
