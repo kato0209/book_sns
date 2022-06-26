@@ -19,8 +19,8 @@
       <div class="me-5">{{selected_user.username}}</div>
       <div class="w-100"></div>
       <div class="fs-5 follow-text">
-        <a id="following_count" href="{% url 'user_list_of_follow' selected_user.id 'following' %}" class="me-3">{{ selected_user_following_count }} フォロー</a>
-        <a id="follower_count" href="{% url 'user_list_of_follow' selected_user.id 'follower' %}">{{ selected_user_follower_count }} フォロワー</a>
+        <a id="following_count" href="{% url 'following' selected_user.id %}" class="me-3">{{ selected_user_following_count }} フォロー</a>
+        <a id="follower_count" href="{% url 'follower' selected_user.id %}">{{ selected_user_followed_count }} フォロワー</a>
       </div>
       {% if user == selected_user %}
       <a href="{% url 'profile_edit' user.id %}" class="btn btn-success logout-button ms-auto" role="button" aria-pressed="true">プロフィールを変更</a>
@@ -40,9 +40,10 @@
       {% endif %}
   </div>
   <!--------------------->
+</div>
 
   <!-- 投稿の一覧 -->
-<div id="tweet-list">
+<div id="tweet_list">
  {% for tweet in object_list reversed %}
    <div class="tweet-container container border border-secondary">
        <p class="font-bold d-flex">
@@ -69,13 +70,17 @@
         {% endif %}
             <p id="tweet-count-{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
       </div>
-      <div class="stars ms-auto" name="{{ tweet.rating }}">
-       <span class="star" name="1">★</span>
-       <span class="star" name="2">★</span>
-       <span class="star" name="3">★</span>
-       <span class="star" name="4">★</span>
-       <span class="star" name="5">★</span>
-     </div>
+      {% with ''|center:5 as range %}
+       <div class="stars ms-auto">
+        {% for _ in range %}
+         {% if forloop.counter <= tweet.rating %}
+          <span class="star-yellow">★</span>
+         {% else %}
+          <span class="star-gray">★</span>
+         {% endif %}
+        {% endfor %}
+       </div>
+      {% endwith %}
      </div>
      <hr>
      <div class="comment">
@@ -106,12 +111,12 @@
  </div>
  <!--------->
 </div>
+
 <button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
 {% endblock content %}
 
 {% block footer %}
 <script src="{% static 'up_button.js' %}"></script>
-<script src="{% static 'tweet.js' %}"></script>
 
 <script type="text/javascript">
 
@@ -152,7 +157,7 @@ const TweetListApp=Vue.createApp({
     }
 })
 TweetListApp.config.compilerOptions.delimiters = ['[[', ']]']
-TweetListApp.mount('#tweet-list')
+TweetListApp.mount('#tweet_list')
 
 const UserProfileApp=Vue.createApp({
     data:()=>({

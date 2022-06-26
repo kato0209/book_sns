@@ -3,7 +3,7 @@
 
 {% block head %}
 <link href="{% static 'tweet_create.css' %}" rel="stylesheet"> 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://unpkg.com/vue-star-rating@next/dist/VueStarRating.umd.min.js"></script>
 {% endblock head %}
 
 {% block title %}
@@ -15,7 +15,7 @@
 <div class="container text-center mt-5 mb-3">
   <i class="far fa-grin-squint tweetpage-title">投稿しましょう!</i>
  <main class="form-tweet border border-secondary">
-   <form method="POST" action="{% url 'tweetCreate' ISBNcode %}" enctype="multipart/form-data" id="TweetForm">{% csrf_token %}
+   <form method="POST" action="{% url 'tweetCreate' ISBNcode %}" novalidate enctype="multipart/form-data" id="TweetForm">{% csrf_token %}
      <div class="d-flex ms-auto mb-3">
       <img src="{{ user.ProfileImage.url }}" width="50px" height="50px" style="border-radius: 100%;">
      </div>
@@ -23,32 +23,37 @@
      <div class="mb-3">{{ form.content }}</div>
      <div class="mb-3 mt-3"><img id="file-preview" class="bg-light"></div>
       <div class="hooter-container d-flex">
-       <div class="rating">
-        <div class="stars d-flex">
-          <span class="star" name="1">★</span>
-          <span class="star" name="2">★</span>
-          <span class="star" name="3">★</span>
-          <span class="star" name="4">★</span>
-          <span class="star" name="5">★</span>
+        <div id="star_rating" class="me-4 d-flex">
+          {{ form.rating }}
+         <star-rating v-model="rating" :show-rating="false" :star-size="30" @hover:rating="setRating" @click="selectRating"></star-rating>
         </div>
-        {{ form.rating.as_hidden }}
-
-        {% if form.rating.errors %}
-         <div class="errorlist text-warning">
-          {% for error in form.rating.errors %}
-            {{error}}
-          {% endfor %}
-         </div>
-        {% endif %}
-       </div>
         <button class="btn btn-lg btn-success" type="submit">投稿</button>
-      </div>
      </div>
    </form>
  </main>
+
+ <div class="d-flex justify-content-center mt-3" name="error-div">
+  <ul>
+  {% if form.content.errors %}
+    {% for error in form.content.errors %}
+    <li class="text-warning mb-2">
+      {{error}} 
+    </li>
+    {% endfor %}
+  {% endif %}
+
+  {% if form.rating.errors %}
+    {% for error in form.rating.errors %}
+    <li class="text-warning mb-2">
+      {{error}} 
+    </li>
+    {% endfor %}
+  {% endif %}
+  </ul>
+</div>
+
 </div>
 {% endblock content %}
-
 {% block footer %}
 <script src="{% static 'tweet_create.js' %}"></script>
 {% endblock footer%}

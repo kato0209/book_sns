@@ -5,81 +5,116 @@
 <link href="{% static 'chat_room.css' %}" rel="stylesheet"> 
 {% endblock head %}
 
-{% block content %}
-<div class="container">
-<div id="chat-room-body">
-{% for message in messages %}
- {% if message.user == user %}
-   <div class="chat-box-right">
-        <div class="chat-txt chat-txt-right">{{message.content}}</div>
-   </div>
-   <span><sub class="chat-time-right">{{message.created_at|date:"H:i"}}</sub></span>
- {% else %}
-  <div class="chat-box-left">
-      <div class="icon-img-left">
-        <img src="{{ Partner.ProfileImage.url }}" class="user-icon">
-      </div>
-       <div class="chat-txt chat-txt-left">{{message.content}}</div>
-   </div>
-   <span><sub class="chat-time-left">{{message.created_at|date:"H:i"}}</sub></span>
- {% endif %}
-{% endfor %}
-</div>
+{% block content %} 
+<div id="chat_room_container" class="container">
+    <div id="chat_room_body">
+        {% for message in messages %}
+        {% if message.user == user %}
+        <div class="chat-box">
+            <div class="chat-box-right">
+                <div class="chat-txt chat-txt-right">{{ message.content | linebreaksbr }}</div>
+            </div>
+            <span><sub class="chat-time-right">{{ message.created_at | date:"H:i" }}</sub></span>
+        </div>
+        {% else %}
+        <div class="chat-box">
+            <div class="chat-box-left">
+                <div class="icon-img-left">
+                    <img src="{{ Partner.ProfileImage.url }}" class="user-icon">
+                </div>
+                <div class="chat-txt chat-txt-left">{{ message.content | linebreaksbr }}</div>
+            </div>
+            <span><sub class="chat-time-left">{{ message.created_at | date:"H:i" }}</sub></span>
+        </div>
+        {% endif %}
+        {% endfor %}
 
-<footer class="footer mt-auto py-3 fixed-bottom">
-    <div class="container d-flex">
-        <textarea name="text" class="d-flex form-control" placeholder="メッセージを入力" id="msg" required="" value=""></textarea>
-        <div class="d-flex">
-         <button id="send" class="btn btn-success ms-auto">送信</button>
+        <div v-for="message_obj in message_list" class="chat-box">
+            <div v-if="message_obj.chatbox_type == 'chat-box-right'" class="chat-box-right">
+                <div class="chat-txt chat-txt-right">[[ message_obj.message ]]</div>
+            </div>
+            <div v-else class="chat-box-left">
+                <div class="icon-img-left">
+                    <img src="{{ Partner.ProfileImage.url }}" class="user-icon">
+                </div>
+                <div class="chat-txt chat-txt-left">[[ message_obj.message ]]</div>
+            </div>
+            <span v-if="message_obj.chatbox_type == 'chat-box-right'"><sub class="chat-time-right">[[ message_obj.time ]]</sub></span>
+            <span v-else><sub class="chat-time-left">[[ message_obj.time ]]</sub></span>
         </div>
     </div>
-</footer>
+
+    <footer class="footer mt-auto py-3 fixed-bottom">
+        <div class="container d-flex">
+            <textarea id="message_form" v-on:input="resizeMessageForm" name="text" class="d-flex form-control" placeholder="メッセージを入力"></textarea>
+            <div class="d-flex">
+            <button id="send_message" v-on:click="sendMessage" class="btn btn-success ms-auto">送信</button>
+            </div>
+        </div>
+    </footer>
+</div>
 {% endblock content %}
 
 {% block footer%}
-<script src="{% static 'chat_room.js' %}"></script>
-
-<script>
-const url = '{{ WS_URL }}' + '{{ room.id }}';
-var ws = new WebSocket(url)
-
-document.getElementById("send").onclick = function sendMessage () {
-    var sendData = {
-        message: document.getElementById('msg').value,
-        room_name:'{{ room.id }}',
-        user_id:'{{ user.id }}'
-    };
-    ws.send(JSON.stringify(sendData));
-
-    var textarea=document.getElementById("msg");
-    textarea.value="";
-    textarea.style.height="30px";
-    setTimeout(scrollToBottom,100);
-};
-
-ws.onmessage = e => {
-    var receiveData = JSON.parse(e.data)
-    var messageBox = document.createElement('div')
-    var timetag=document.createElement('span')
-    if(receiveData.user_id=='{{user.id}}'){
-        messageBox.className = 'chat-box-right'
-        var body = '<div class="chat-txt chat-txt-right">' + receiveData.message + '</div>'
-        var time='<sub class="chat-time-right">'+receiveData.created_time+'</sub>'
-        messageBox.innerHTML=body
-        timetag.innerHTML=time
+<script type="text/javascript">
+const ChatApp = Vue.createApp({ 
+    data:()=>({
+        websocket:'',
+        message_form:'',
+        clientHeight:'',
+        chatRoomBody:'',
+        chatBoxComponent:'',
+        message_list:[],
+    }),
+    methods:{
+        initWebsocket:function(){
+            const url = '{{ WS_URL }}' + '{{ room.id }}'
+            this.websocket = new WebSocket(url)
+            this.websocket.onmessage=this.websocketOnMessage
+        },
+        initMessageForm:function(){
+            this.message_form=document.getElementById('message_form')
+            this.message_form.style.lineHeight="20px"
+            this.message_form.style.height="30px"
+            this.clientHeight=this.message_form.clientHeight
+        },
+        sendMessage:function(){
+            let sendData = {
+                message: this.message_form.value,
+                room_name:'{{ room.id }}',
+                user_id:'{{ user.id }}'
+            }
+            this.websocket.send(JSON.stringify(sendData))
+            this.message_form.value=""
+            this.message_form.style.height="30px"
+        },
+        websocketOnMessage:function(event){
+            let receiveData=JSON.parse(event.data)
+            if(receiveData.user_id=='{{ user.id }}'){
+                console.log(receiveData.message)
+                this.message_list.push({message:receiveData.message,time:receiveData.created_time,chatbox_type:'chat-box-right'})
+            }
+            else{
+                this.message_list.push({message:receiveData.message,time:receiveData.created_time,chatbox_type:'chat-box-left'})
+            }
+            setTimeout(()=>{this.chatRoomBody.scrollIntoView(false)}, 50)
+        },
+        resizeMessageForm:function(){
+            this.message_form.style.height = this.clientHeight + 'px'
+            let scrollHeight = this.message_form.scrollHeight
+            this.message_form.style.height = scrollHeight + 'px'
+        }
+    },
+    mounted:function(){
+        this.initWebsocket()
+        this.initMessageForm()
+        this.chatRoomBody=document.getElementById('chat_room_body')
+        this.chatRoomBody.scrollIntoView(false)
     }
-    else{
-        messageBox.className = 'chat-box-left'
-        var imgUrl='{{Partner.ProfileImage.url}}'
-        var imgtag='<div class="icon-img-left"><img src='+imgUrl+' class="user-icon"></div>'
-        var body = '<div class="chat-txt chat-txt-left">' + receiveData.message + '</div>'
-        var time='<sub class="chat-time-left">'+receiveData.created_time+'</sub>'
-        messageBox.innerHTML=imgtag+body
-        timetag.innerHTML=time
-    }
-    document.getElementById('chat-room-body').appendChild(messageBox)
-    document.getElementById('chat-room-body').appendChild(timetag)
-}
+})
+
+ChatApp.config.compilerOptions.delimiters = ['[[', ']]']
+ChatApp.mount('#chat_room_container')
 
 </script>
 {% endblock footer %}

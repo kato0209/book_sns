@@ -99,9 +99,13 @@ p.count{
 .comment a:hover{
     color: gray;
 }
-.star{
+.star-gray{
     font-size: 1.33333em;
     color: gray;
+}
+.star-yellow{
+    font-size: 1.33333em;
+    color: yellow;
 }
 .book-container{
     width: 90%;

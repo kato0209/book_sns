@@ -14,7 +14,7 @@
 {% if not tweetmodel_list %}
 <h1 class="mt-5 ms-3">まだ投稿がありません</h1>
 {% else %}
-<div id="tweet-list">
+<div id="tweet_list">
   {% for tweet in tweetmodel_list %}
   <div class="tweet-container container border border-secondary">
       <p class="font-bold d-flex">
@@ -43,13 +43,17 @@
         {% endif %}
         <p id="tweet_count_{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
       </div>
-      <div class="stars ms-auto" name="{{ tweet.rating }}">
-        <span class="star" name="1">★</span>
-        <span class="star" name="2">★</span>
-        <span class="star" name="3">★</span>
-        <span class="star" name="4">★</span>
-        <span class="star" name="5">★</span>
-      </div>
+      {% with ''|center:5 as range %}
+        <div class="stars ms-auto">
+        {% for _ in range %}
+          {% if forloop.counter <= tweet.rating %}
+          <span class="star-yellow">★</span>
+          {% else %}
+          <span class="star-gray">★</span>
+          {% endif %}
+        {% endfor %}
+        </div>
+      {% endwith %}
     </div>
     <hr>
      <div class="comment">
@@ -85,7 +89,6 @@
 
 {% block footer %}
 <script src="{% static 'up_button.js' %}"></script>
-<script src="{% static 'tweet.js' %}"></script>
 
 <!--いいね機能のAjax処理-->
 <script type="text/javascript">
@@ -126,6 +129,6 @@ const TweetListApp=Vue.createApp({
     }
 })
 TweetListApp.config.compilerOptions.delimiters = ['[[', ']]']
-TweetListApp.mount('#tweet-list') 
+TweetListApp.mount('#tweet_list') 
 </script>
 {% endblock footer %}

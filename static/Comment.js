@@ -1,22 +1,10 @@
-//textareaのフォームサイズ自動変更
- var form=document.getElementById('CommentForm');
- form.style.lineHeight="20px";
- form.style.height="30px";
+const textarea=document.getElementById('comment_input'); 
+textarea.style.lineHeight="20px"; 
+textarea.style.height="30px"; 
 
- form.addEventListener('input',function(e){
-     if(e.target.scrollHeight>e.target.offsetHeight){
-         e.target.style.height=e.target.scrollHeight+"px";
-     }else{
-         var height;
-         var lineHeight=Number(e.target.style.lineHeight.replace("px",""));
-         while(true){
-             height=Number(e.target.style.height.replace("px",""));
-             if(e.target.scrollHeight>height){
-                 e.target.style.height=e.target.scrollHeight+"px"
-                 break;
-             }
-             e.target.style.height=height-lineHeight+"px";
-         }
-     }
- });
-
+let clientHeight=textarea.clientHeight
+textarea.addEventListener('input', function(){
+    textarea.style.height = clientHeight + 'px';
+    let scrollHeight = textarea.scrollHeight;
+    textarea.style.height = scrollHeight + 'px';
+});

@@ -1,13 +1,12 @@
 document.getElementById('id_ProfileImage').addEventListener('change', function (e) {
     
-    var file = e.target.files[0];
+    let file = e.target.files[0];
 
-    var fileReader = new FileReader();
+    let fileReader = new FileReader();
     fileReader.onload = function() {
-        
-        var dataUri = this.result;
+        let dataUri = this.result;
 
-        var img = document.getElementById('preview');
+        let img = document.getElementById('preview');
         img.src = dataUri;
     }
     
