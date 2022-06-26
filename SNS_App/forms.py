@@ -40,9 +40,9 @@ class TweetCreationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TweetCreationForm, self).__init__(*args, **kwargs)
         self.fields['content'].widget.attrs.update({'class' : 'form-control','placeholder':'感想を書こう!','autofocus' : 'autofocus'})
+        self.fields['rating'].widget.attrs.update({'class':'d-transparent'})
         
-    rating=forms.IntegerField(required=True)
-
+    
     class Meta:
         model = TweetModel
         fields = '__all__'
@@ -52,6 +52,14 @@ class TweetCreationForm(forms.ModelForm):
                   'snsImage':"画像",
         }
 
+        error_messages = {
+            "content": {
+                "required": "本文が入力されていません",
+            },
+            "rating": {
+                "required": "評価を選んで下さい",
+            },
+        }
 
         
 
@@ -71,7 +79,7 @@ class CreateCommentForm(forms.ModelForm):
 
     def __init__(self,*args,**kwargs):
         super(CreateCommentForm, self).__init__(*args, **kwargs)
-        self.fields['text'].widget.attrs.update({'class' : 'form-control','placeholder':'コメントを書く','id':'CommentForm'})
+        self.fields['text'].widget.attrs.update({'class' : 'form-control','placeholder':'コメントを書く','id':'comment_input'})
 
     class Meta:
         model = Comment
@@ -80,7 +88,7 @@ class CreateCommentForm(forms.ModelForm):
 class RakutenSearchForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(RakutenSearchForm, self).__init__(*args, **kwargs)
-        self.fields['page'].initial = 1
+        self.fields['page_number'].initial = 1
         self.fields['category'].widget.attrs.update({'class' : 'form-select'})
 
     BOOK_CHOICES = (
@@ -101,4 +109,4 @@ class RakutenSearchForm(forms.Form):
         label='ジャンル',
     )
     title=forms.CharField(label='タイトル',max_length=200,required=False)
-    page=forms.IntegerField(widget=forms.HiddenInput)
+    page_number=forms.IntegerField(widget=forms.HiddenInput)

@@ -81,7 +81,7 @@ class Home2View(LoginRequiredMixin,generic.ListView):
         Connections=self.request.user.following.all()
         following_list=[]
         for connection in Connections:
-            following_list.append(connection.follower)
+            following_list.append(connection.followed)
         queryset=queryset.filter(user__in=following_list).order_by('created_at')
         keyword=self.request.GET.get('keyword')
         if keyword:
@@ -182,43 +182,57 @@ class SearchUserView(LoginRequiredMixin,generic.ListView):
 
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
-        followed_list=[]
+        following_list=[]
 
         for searched_user in context['user_list']:
-            follower_list=searched_user.follower.all()
-            followed = follower_list.filter(following=self.request.user)
+            followed_connections=searched_user.followed.all()
+            followed = followed_connections.filter(following=self.request.user)
             if followed.exists():
-                followed_list.append(searched_user.id)
+                following_list.append(searched_user.id)
 
-        context['followed_list']=followed_list
+        context['following_list']=following_list
         
         return context
 
-def return_user_list_of_follow(request, user_id, type_of_follow):
+def follower_show(request, user_id):
     selected_user=CustomUser.objects.get(id=user_id)
     user_list=[]
-    if type_of_follow == 'follower':
-        user_list_connection=selected_user.follower.all()
-        for connection in user_list_connection:
-            user_list.append(connection.following)
-    else:
-        user_list_connection=selected_user.following.all()
-        for connection in user_list_connection:
-            user_list.append(connection.follower)
-    
-    followed_list=[]
+    user_list_connection=selected_user.followed.all()
+    for connection in user_list_connection:
+        user_list.append(connection.following)
+    following_list=[]
     for user in user_list:
-        follower_list=user.follower.all()
-        followed = follower_list.filter(following=request.user)
+        followed_connections=user.followed.all()
+        followed = followed_connections.filter(following=request.user)
         if followed.exists():
-            followed_list.append(user.id)
+            following_list.append(user.id)
     
     context={
         'user_list':user_list,
-        'followed_list':followed_list,
-        'type_of_follow':type_of_follow
+        'following_list':following_list,
+        'type':'follower',
     }
-    return render(request,'user-list-of-follow.html',context)
+    return render(request,'user_list_of_follow.html',context)
+
+def following_show(request, user_id):
+    selected_user=CustomUser.objects.get(id=user_id)
+    user_list=[]
+    user_list_connection=selected_user.following.all()
+    for connection in user_list_connection:
+        user_list.append(connection.followed)
+    following_list=[]
+    for user in user_list:
+        followed_connections=user.followed.all()
+        followed = followed_connections.filter(following=request.user)
+        if followed.exists():
+            following_list.append(user.id)
+    
+    context={
+        'user_list':user_list,
+        'following_list':following_list,
+        'type':'following',
+    }
+    return render(request,'user_list_of_follow.html',context)
             
 
 @login_required
@@ -270,7 +284,7 @@ def comment_like_func(request):
 
 class userPageView(LoginRequiredMixin,generic.ListView):
     model=TweetModel
-    template_name='userPage.html'
+    template_name='user_page.html'
 
     def get_queryset(self,**kwargs):
         queryset = super().get_queryset(**kwargs)
@@ -284,10 +298,10 @@ class userPageView(LoginRequiredMixin,generic.ListView):
         followed=False
         selected_user = CustomUser.objects.get(id=self.kwargs['pk'])
         selected_user_following_count=selected_user.following.count()
-        selected_user_follower_count=selected_user.follower.count()
+        selected_user_followed_count=selected_user.followed.count()
         following_list=self.request.user.following.all() 
         
-        followed=following_list.filter(follower=selected_user)
+        followed=following_list.filter(followed=selected_user)
         if followed.exists():
             followed=True
 
@@ -297,7 +311,7 @@ class userPageView(LoginRequiredMixin,generic.ListView):
                 liked_list.append(tweet.id)
 
         context['selected_user_following_count']=selected_user_following_count
-        context['selected_user_follower_count']=selected_user_follower_count
+        context['selected_user_followed_count']=selected_user_followed_count
         context['selected_user']=selected_user
         context['liked_list']=liked_list
         context['followed']=followed
@@ -314,16 +328,16 @@ def follow_func(request):
         from_user_page=json.loads(request.body).get('from_user_page')
         followed_user = CustomUser.objects.get(pk=follow_id)
         followed=False
-        connection = Connection.objects.filter(follower=followed_user,following=following)
+        connection = Connection.objects.filter(followed=followed_user,following=following)
 
         if connection.exists():
             connection.delete()
         else:
-            connection.create(follower=followed_user, following=following)
+            connection.create(followed=followed_user, following=following)
             followed = True
 
         if from_user_page:
-            follower_count=followed_user.follower.count()
+            follower_count=followed_user.followed.count()
             context={
             'follow_id': follow_id,
             'followed': followed,
@@ -447,7 +461,10 @@ class SearchItem(LoginRequiredMixin,generic.View):
     def get(self, request, *args, **kwargs):
         From=self.kwargs['From']
         form=RakutenSearchForm()
-        return render(request,'Item-search.html',{'form':form,'From':From})
+        category_list=[]
+        for category in form['category']:
+            category_list.append(category)
+        return render(request,'item_search.html',{'form':form,'From':From,'category_list':category_list})
 
     def post(self, request, *args, **kwargs):
         form=RakutenSearchForm(request.POST or None)
@@ -455,30 +472,30 @@ class SearchItem(LoginRequiredMixin,generic.View):
         if form.is_valid():
             keyword=form.cleaned_data['title']
             booksGenreId=form.cleaned_data['category']
-            page=form.cleaned_data['page']
+            page_number=form.cleaned_data['page_number']
             if booksGenreId and keyword:
                 params={
                 'title':keyword,
                 'booksGenreId':booksGenreId,
                 'outOfStockFlag':1,
-                'page':page,
+                'page':page_number,
             }
             elif keyword:
                 params={
                 'title':keyword,
                 'outOfStockFlag':1,
-                'page':page,
+                'page':page_number,
             }
             elif booksGenreId:
                 params={
                 'booksGenreId':booksGenreId,
                 'outOfStockFlag':1,
-                'page':page,
+                'page':page_number,
             }
             else:
                 params={
                 'outOfStockFlag':1,
-                'page':page,
+                'page':page_number,
             }
             items=get_api_data(params)
             book_data=[]
@@ -500,16 +517,16 @@ class SearchItem(LoginRequiredMixin,generic.View):
                 }
                 book_data.append(query)
             for_range = [i for i in range(1,11)]
-            return render(request,'Itemlist.html',{
+            return render(request,'item_list.html',{
                 'book_data':book_data,
                 'keyword':keyword,
                 'form':form,
                 'booksGenreId':booksGenreId,
                 'From':From,
-                'page':page,
+                'page_number':page_number,
                 'for_range':for_range,
             })
-        return render(request,'Item-search.html',{
+        return render(request,'item_search.html',{
             'form':form,
             'From':From,
         })

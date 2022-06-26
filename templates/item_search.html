@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load widget_tweaks%}
+{% load static %}
+
+{% block head %}
+<link href="{% static 'Item-search.css' %}" rel="stylesheet"> 
+{% endblock head %}
+
+{% block content %}
+<div class="my-5" id="item_search">
+    {% if From == 'Select' %}
+    <h3 class="mb-4 ms-1">本を選択しよう！</h3>
+    {% endif %}
+    <form method="post" action="{% url 'SearchItem' From %}" class="d-flex" id="Search_form">{% csrf_token %}
+        <div class="align-items-center w-100">
+            {% render_field form.title class="form-control" placeholder="キーワードから探す"%}
+        </div>
+        {{ form.category }}
+        {{ form.page_number }}
+        <button class="btn btn-success" type="submit">検索</button>
+    </form>
+    <h4 class="list-title mt-5">ジャンルから探す</h4>
+    <ul class="list-group" id="ListGroup">
+        {% for category in category_list %}
+        <li class="list-group-item">
+            <a v-on:click="category_post" class="category-selection" id="{{ category.data.value }}" role="button">{{ category.data.label }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock content %}
+
+{% block footer %}
+<script type="text/javascript">
+const SearchItemApp=Vue.createApp({
+    data:()=>({
+        category_pull_down_menu:'',
+    }),
+    mounted:function(){
+        this.category_pull_down_menu=document.getElementById("id_category")
+    },
+    methods:{
+        category_post:function(event){
+            this.category_pull_down_menu.value=event.target.id
+            let form = document.getElementById("Search_form")
+            form.submit()
+        }
+    }
+})
+SearchItemApp.config.compilerOptions.delimiters = ['[[', ']]']
+SearchItemApp.mount('#item_search')
+</script>
+{% endblock footer %}

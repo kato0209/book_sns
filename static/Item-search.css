@@ -29,7 +29,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover,input:-webkit-autofill:focu
 .list-group-item:hover{
     background-color: #F2F2F2;
 }
-.select-category{
+.category-selection{
     background-color: transparent;
     border: None;
     display: block;

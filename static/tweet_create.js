@@ -1,36 +1,17 @@
-const stars =  document.getElementsByClassName('star');
-const Input_rating=document.getElementById('id_rating');
-
- function starMouseover(e) {
-    const index = Number(e.target.getAttribute('name'));
-    for(let j=0; j < index; j++) {
-        stars[j].style.color='yellow';
+const StarRatingApp = Vue.createApp({ 
+    data:()=>({
+        rating:0
+    }),
+    methods:{
+        selectRating(rating){
+            star_rating_ele=document.getElementById('id_rating')
+            star_rating_ele.value=this.rating
+        },
+        setRating(rating){
+            this.rating=rating
+        }
     }
-}
-
-function starMouseout(e) {
-    for (let j=0; j < stars.length; j++) {
-        stars[j].style.color='gray';
-    }
-}
-
-for (let i=0; i < stars.length; i++) {
-    stars[i].addEventListener('mouseover', starMouseover);
-    stars[i].addEventListener('mouseout',starMouseout)
-
-    stars[i].addEventListener('click', function(e){
-        for (let j=0; j < stars.length; j++) {
-            stars[j].style.color='gray';
-        }
-        const index = Number(e.target.getAttribute('name'));
-        for(let j=0; j<index; j++) {
-            stars[j].style.color='yellow';
-        }
-        Input_rating.value=index
-
-        for(let j=0; j<stars.length; j++) {
-            stars[j].removeEventListener('mouseover', starMouseover);
-            stars[j].removeEventListener('mouseout', starMouseout);
-        }
-    });
-}
+})
+StarRatingApp.component('star-rating', VueStarRating.default)
+StarRatingApp.config.compilerOptions.delimiters = ['[[', ']]']
+StarRatingApp.mount('#star_rating')

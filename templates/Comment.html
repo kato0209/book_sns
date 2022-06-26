@@ -13,7 +13,7 @@
 
 
 {% block content %}
-<main id="tweet-list">
+<main id="tweet_list">
   <!-- 本文 -->
     <div class="tweet-container container myborder border-secondary">
         <p class="font-bold d-flex">
@@ -40,13 +40,17 @@
             {% endif %}
             <p id="tweet_count_{{tweet.id}}" class="count"> {{ tweet.like_set.count }} </p>
         </div>
-        <div class="stars ms-auto" name="{{ tweet.rating }}">
-          <span class="star" name="1">★</span>
-          <span class="star" name="2">★</span>
-          <span class="star" name="3">★</span>
-          <span class="star" name="4">★</span>
-          <span class="star" name="5">★</span>
-        </div>
+        {% with ''|center:5 as range %}
+         <div class="stars ms-auto">
+          {% for _ in range %}
+           {% if forloop.counter <= tweet.rating %}
+            <span class="star-yellow">★</span>
+           {% else %}
+            <span class="star-gray">★</span>
+           {% endif %}
+          {% endfor %}
+         </div>
+        {% endwith %}
       </div>
     </div>
 <!--------------------------------->
@@ -100,8 +104,8 @@
 
 <!-- 下部のbar -->
 <footer class="footer mt-auto py-3 fixed-bottom">
- <div class="container">
-    <form method="POST" enctype="multipart/form-data" class="d-flex">{% csrf_token %}
+ <div class="container" id="comment_form">
+    <form method="POST" class="d-flex" v-bind:style="{ lineheight:lineheight+'px', height:height+'px' }" v-on:input="form_resize">{% csrf_token %}
       {{form.text}}
         <div class="d-flex">
          <button class="btn btn-success ms-auto" type="submit" id="submit-button">送信</button>
@@ -115,7 +119,6 @@
 {% block footer %}
 <script src="{% static 'up_button.js' %}"></script>
 <script src="{% static 'Comment.js' %}"></script>
-<script src="{% static 'tweet.js' %}"></script>
 
 <!--いいね機能のAjax処理-->
 <script type="text/javascript">
@@ -182,7 +185,7 @@ const TweetListApp=Vue.createApp({
     }
 })
 TweetListApp.config.compilerOptions.delimiters = ['[[', ']]']
-TweetListApp.mount('#tweet-list') 
+TweetListApp.mount('#tweet_list') 
 </script>
 
 

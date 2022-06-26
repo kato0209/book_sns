@@ -34,7 +34,7 @@
       {{ searched_user.username }} 
       {% if searched_user != user %}
       <div class="ms-auto">
-          {% if searched_user.id in followed_list %}
+          {% if searched_user.id in following_list %}
               <button id="follow_{{searched_user.id}}" v-on:click="follow_post" name="{{searched_user.id}}" class="follow btn btn-light clear-decoration">フォロー解除</button>
           {% else %}
               <button id="follow_{{searched_user.id}}" v-on:click="follow_post" name="{{searched_user.id}}" class="follow btn btn-success clear-decoration">フォロー</button>      

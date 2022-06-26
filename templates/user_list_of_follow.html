@@ -26,7 +26,7 @@
       {{ user_i.username }} 
       {% if user_i != user %}
       <div class="ms-auto">
-          {% if user_i.id in followed_list %}
+          {% if user_i.id in following_list %}
               <button id="follow_{{user_i.id}}" v-on:click="follow_post" name="{{user_i.id}}" class="follow btn btn-light clear-decoration">フォロー解除</button>
           {% else %}
               <button id="follow_{{user_i.id}}" v-on:click="follow_post" name="{{user_i.id}}" class="follow btn btn-success clear-decoration">フォロー</button>      
@@ -41,7 +41,7 @@
 
   <button id="UpButton"><i class="fas fa-angle-double-up"></i></button>
 {% else %}
-  {% if type_of_follow == 'follower' %}
+  {% if type == 'follower' %}
   <h1>まだフォロワーはいません</h1>
   {% else %}
   <h1>まだフォローしているユーザーはいません</h1>

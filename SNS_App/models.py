@@ -92,7 +92,7 @@ class Like(models.Model):
 
 class Connection(models.Model):
     following = models.ForeignKey(CustomUser, related_name='following', on_delete=models.CASCADE,null=True)
-    follower = models.ForeignKey(CustomUser, related_name='follower', on_delete=models.CASCADE,null=True)
+    followed = models.ForeignKey(CustomUser, related_name='followed', on_delete=models.CASCADE,null=True)
 
 class Room(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
