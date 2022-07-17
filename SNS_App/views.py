@@ -1,6 +1,8 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth import authenticate,get_user_model,login,logout
 from django.db import IntegrityError
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from .models import *
@@ -14,14 +16,18 @@ import json
 import os
 import environ
 from SNS_project import settings 
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.utils.encoding import force_text
+from django.utils.http import is_safe_url, urlsafe_base64_decode
 
-class signupView(generic.CreateView):
+class SignupView(generic.CreateView):
     model=get_user_model()
     form_class=CustomUserCreationForm
     template_name='signup.html'
     success_url = reverse_lazy('login')
 
-def loginFunc(request):
+def login_func(request):
     if request.method=='POST':
         email=request.POST['email']
         password=request.POST['password']
@@ -37,9 +43,92 @@ def loginFunc(request):
     return render(request,'login.html')
 
 
-def logoutFunc(request):
+def logout_func(request):
     logout(request)
     return redirect('login')
+
+@login_required
+def password_change(request):
+    if request.method=='GET':
+        form=MyPasswordChangeForm(user=request.user)
+        context={
+            'form':form,
+        }
+        return render(request, 'password_change.html', context)
+    elif request.method=='POST':
+        form=MyPasswordChangeForm(user=request.user,data=request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)
+            return redirect('PasswordChangeDone')
+        else:
+            return render(request, 'password_change.html', {'form':form})
+
+@login_required
+def passeword_change_done(request):
+    return render(request, 'password_change_done.html')
+
+
+def password_reset(request):
+    template_name='password_reset.html'
+    email_template_name='password_reset_message.txt'
+    subject_template_name='password_reset_subject.txt'
+    password_reset_form=MyPasswordResetForm
+    token_generator=default_token_generator
+
+    if request.method=='GET':
+        form=password_reset_form()
+        context={'form':form}
+        return render(request, template_name, context)
+    elif request.method=='POST':
+        form=password_reset_form(request.POST)
+        if form.is_valid():
+            context={
+                'use_https':request.is_secure(),
+                'token_generator':token_generator,
+                'from_email':settings.FROM_EMAIL,
+                'email_template_name':email_template_name,
+                'subject_template_name':subject_template_name,
+                'request':request,
+            }
+            context['domain_override']=request.get_host()
+            form.save(**context)
+            return redirect('PasswordResetDone')
+        else:
+            print(100)
+            context={'form':form}
+            return render(request, 'password_reset.html', context)
+
+def password_reset_done(request):
+    return render(request, 'password_reset_done.html')
+
+def password_reset_confirm(request, uidb64, token):
+    template_name='password_reset_confirm.html'
+    token_generator=default_token_generator
+    set_password_form=MySetPasswordForm
+
+    user_model=get_user_model()
+    assert uidb64 is not None and token is not None
+    try:
+        user_id=force_text(urlsafe_base64_decode(uidb64))
+        user=user_model.objects.get(pk=user_id)
+    except (TypeError, ValueError, OverflowError, UserModel.DoesNotExist):
+        user=None
+    if user is not None and token_generator.check_token(user, token):
+        if request.method == 'POST':
+            form=set_password_form(user, request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('PasswordResetComplete')
+        else:
+            form=set_password_form(user)
+    else:
+        form=None
+    
+    return render(request, template_name, {'form':form})
+
+def password_reset_complete(request):
+    return render(request, 'password_reset_complete.html')
 
 
 class HomeView(LoginRequiredMixin,generic.ListView):
@@ -104,7 +193,7 @@ class Home2View(LoginRequiredMixin,generic.ListView):
         return context
 
 @login_required
-def TweetCreate(request,ISBNcode):
+def tweet_create(request,ISBNcode):
     if request.method == "POST":
         form=TweetCreationForm(request.POST)
         book=BookData.objects.get(ISBNcode=ISBNcode)
@@ -124,7 +213,7 @@ def TweetCreate(request,ISBNcode):
         return render(request,'tweet_create.html',{'form':form,'ISBNcode':ISBNcode,'book_title':book_title})
 
 @login_required
-def SelectedItem(request,ISBNcode):
+def select_item(request,ISBNcode):
     Item=get_api_data(params={'isbn':ISBNcode})
     item=Item[0]['Item']
     book=BookData.objects.filter(ISBNcode=ISBNcode)

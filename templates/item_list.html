@@ -32,7 +32,7 @@
                         <h3 class="text-warning">{{book.itemPrice}}円<sub class="text-secondary">(税込み)</sub></h3>
                     </div>
                     {% if From == "Select" %}
-                     <div class="ms-auto"><a href="{% url 'SelectedItem' book.ISBNcode %}" class="btn btn-success" role="button" aria-pressed="true">選択</a></div>
+                     <div class="ms-auto"><a href="{% url 'SelectItem' book.ISBNcode %}" class="btn btn-success" role="button" aria-pressed="true">選択</a></div>
                     {% elif From == "Search" %}
                     <div class="ms-auto"><a href="{% url 'TweetOfItem' book.ISBNcode %}" class="btn btn-success" role="button" aria-pressed="true">みんなの投稿を見る</a></div>
                     {% endif %}
