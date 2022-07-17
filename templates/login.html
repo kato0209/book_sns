@@ -22,9 +22,10 @@
       <h1 class="h3 mb-3 fw-normal">Please login</h1>
       <input type="email" class="form-control" name="email" placeholder="メールアドレス" required autofocus>
       <input type="password"  class="form-control" name="password" placeholder="パスワード" required>
+      <p class="d-flex mt-2 mb-3"><a href="{% url 'PasswordReset' %}" class="ms-auto">パスワードを忘れた場合</a></p>
       <button class="w-100 btn btn-lg btn-success" type="submit">Login</button>
     </form>
- </main>
-   <p style="color: white;">アカウントをお持ちでない方はこちら→<a href="{% url 'signup' %}">アカウントを作成</a></p>
+    <p class="mt-2">アカウントをお持ちでない方はこちら→<a href="{% url 'signup' %}">アカウントを作成</a></p>
+  </main>
 </div>
 {% endblock content %}

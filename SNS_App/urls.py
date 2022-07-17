@@ -1,14 +1,21 @@
 from django.contrib import admin
 from django.urls import path
 from .views import *
+
 urlpatterns = [
-    path('',signupView.as_view(),name='signup'),
-    path('login/',loginFunc,name='login'),
-    path('logout/',logoutFunc,name='logout'),
+    path('',SignupView.as_view(),name='signup'),
+    path('login/',login_func,name='login'),
+    path('logout/',logout_func,name='logout'),
+    path('PasswordChange/',password_change,name='PasswordChange'),
+    path('PasswordChange/Done/',passeword_change_done,name='PasswordChangeDone'),
+    path('PasswordReset/',password_reset,name='PasswordReset'),
+    path('PasswordReset/Done/',password_reset_done,name='PasswordResetDone'),
+    path('PasswordResetConfirm/<str:uidb64>/<str:token>/',password_reset_confirm,name='PasswordResetConfirm'),
+    path('PasswordResetComplete/',password_reset_complete,name='PasswordResetComplete'),
     path('home/',HomeView.as_view(),name='home'),
     path('home2/',Home2View.as_view(),name='home2'),
-    path('tweetCreate/<str:ISBNcode>',TweetCreate,name='tweetCreate'),
-    path('SelectedItem/<str:ISBNcode>',SelectedItem,name='SelectedItem'), 
+    path('tweetCreate/<str:ISBNcode>',tweet_create,name='tweetCreate'),
+    path('SelectItem/<str:ISBNcode>',select_item,name='SelectItem'), 
     path('TweetDelete/<int:tweet_pk>',tweet_del,name='TweetDelete'),
     path('CommentDelete/<int:comment_pk>',comment_del,name='CommentDelete'),
     path('profile_edit/<int:pk>',profile_editView.as_view(),name='profile_edit'),

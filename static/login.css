@@ -57,3 +57,6 @@ body {
 .errortext{
     color:yellow;
   }
+main p a{
+  text-decoration: none;
+}
