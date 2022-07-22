@@ -16,6 +16,10 @@ class CustomUserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class' : 'form-control','placeholder': 'パスワード'}))
     password2 = forms.CharField(label='Repeat Password', widget=forms.PasswordInput(attrs={'class' : 'form-control','placeholder': 'パスワード(再入力)'}))
 
+    def __init__(self, *args, **kwargs):
+        super(CustomUserCreationForm, self).__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({'class' : 'form-control','placeholder': 'メールアドレス'})
+        self.fields['username'].widget.attrs.update({'class' : 'form-control','placeholder': 'ユーザー名'})
 
     def clean_password1(self):
         password1 = self.cleaned_data.get("password1")
@@ -23,7 +27,6 @@ class CustomUserCreationForm(forms.ModelForm):
             return password1
         else:
             raise forms.ValidationError('※半角英小文字大文字数字をそれぞれ1種類以上含む8文字以上100文字以下の\nパスワードを設定して下さい')
-
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -40,15 +43,34 @@ class CustomUserCreationForm(forms.ModelForm):
             user.save()
         return user   
 
-    def __init__(self, *args, **kwargs):
-        super(CustomUserCreationForm, self).__init__(*args, **kwargs)
-        self.fields['email'].widget.attrs.update({'class' : 'form-control','placeholder': 'メールアドレス'})
-        self.fields['username'].widget.attrs.update({'class' : 'form-control','placeholder': 'ユーザー名'})
-
 
     class Meta:
         model = get_user_model()
         fields = ('email','username')
+
+class EmailChangeForm(forms.ModelForm):
+
+    def __init__(self, user, *args, **kwargs):
+        super(EmailChangeForm, self).__init__(*args, **kwargs)
+        self.user=user
+        self.fields['email'].widget.attrs.update({'class' : 'form-control'})
+    
+    def save(self, commit=True):
+        user=self.user
+        print(user)
+        user.email = self.cleaned_data["email"]
+        print(user)
+        if commit:
+            user.save()
+        return user   
+
+    class Meta:
+        model = get_user_model()
+        fields = ('email',)
+
+        labels = {
+            'email':"新しいメールアドレス",
+        }
 
 class MyPasswordChangeForm(PasswordChangeForm):
 
@@ -90,6 +112,7 @@ class MyPasswordResetForm(PasswordResetForm):
             raise forms.ValidationError('有効なメールアドレスを入力してください。')
         else:
             return email
+    
 
 class MySetPasswordForm(SetPasswordForm):
    

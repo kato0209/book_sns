@@ -38,7 +38,7 @@ def login_func(request):
             return redirect('home')
             
         else:
-            return render(request,'login.html',{'error':'ユーザ名、パスワードが間違っています。'})
+            return render(request,'login.html',{'error':'ユーザ名、パスワードが間違っています'})
 
     return render(request,'login.html')
 
@@ -46,6 +46,42 @@ def login_func(request):
 def logout_func(request):
     logout(request)
     return redirect('login')
+
+@login_required
+def authenticate_for_email_change(request):
+    if request.method == 'POST':
+        password=request.POST['password']
+        email=request.user.email
+        user=authenticate(request,email=email,password=password)
+        if user is not None:
+            token=default_token_generator.make_token(user)
+            return redirect(reverse('EmailChange', args=[token]))
+        else:
+            return render(request,'authenticate_for_email_change.html',{'error':'パスワードが間違っています'})
+    return render(request,'authenticate_for_email_change.html')
+
+@login_required
+def email_change(request, token):
+    if default_token_generator.check_token(request.user, token):
+        if request.method=='GET':
+            form=EmailChangeForm(user=request.user)
+            context={
+                'form':form,
+            }
+            return render(request, 'email_change.html', context)
+        elif request.method=='POST':
+            form=EmailChangeForm(user=request.user, data=request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect(reverse('EmailChangeDone', args=[token]))
+            else:
+                return render(request, 'email_change.html', {'form':form})
+    else:
+        return render(request, 'email_change.html', {'form':None})
+
+@login_required
+def email_change_done(request, token):
+    return render(request, 'email_change_done.html')
 
 @login_required
 def password_change(request):
@@ -95,7 +131,6 @@ def password_reset(request):
             form.save(**context)
             return redirect('PasswordResetDone')
         else:
-            print(100)
             context={'form':form}
             return render(request, 'password_reset.html', context)
 
