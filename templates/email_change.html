@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+<link href="{% static 'email_change.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+
+{% endblock head %}
+{% block title %}
+パスワード変更
+{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+<main class="text-center">
+    {% if form != None %}
+    <form action="" method="POST">{% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+        <div class="form-group mb-3">
+            <label class="d-flex" for="{{ field.id_for_label }}"><span class="me-auto">{{ field.label }}</span></label>
+            {{ field }}
+            <span class="text-warning">{{ field.errors | linebreaksbr }}</span>
+        </div>
+        {% endfor %}
+          <div class="d-flex">
+            <button type="submit" class="btn btn-success ms-auto">変更</button>
+          </div>
+    </form>
+    {% else %}
+        <h1>このページは有効ではありません</h1>
+    {% endif %}
+</main>
+</div>
+
+{% endblock content %}

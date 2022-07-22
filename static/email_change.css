@@ -1,0 +1,11 @@
+html,
+body {
+  height: 100%;
+}
+main{
+    max-width: 600px !important;
+}
+.errorlist{
+    list-style: none;
+}
+

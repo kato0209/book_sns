@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+
+{% endblock head %}
+{% block title %}
+パスワード認証
+{% endblock title %}
+
+
+{% block content %}
+  
+<div class="text-center mt-5 d-flex">
+ <main class="ms-auto me-auto">
+    <form method="POST">{% csrf_token %}
+      <h1 class="h3 mb-3 fw-normal">メールアドレスの変更にはパスワードの入力が必要です</h1>
+      <p class="text-warning">{{error}}</p>
+      <input type="password"  class="form-control" name="password" placeholder="パスワード" required>
+      <div class="d-flex">
+        <button class="btn btn-success mt-3 ms-auto" type="submit">次へ</button>
+      </div>
+    </form>
+  </main>
+</div>
+{% endblock content %}
